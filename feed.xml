@@ -1,0 +1,2472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<link href="https://matklad.github.io/feed.xml" rel="self" type="application/atom+xml"/>
+<link href="https://matklad.github.io" rel="alternate" type="text/html"/>
+<updated>2023-10-24T14:26:47.025Z</updated>
+<id>https://matklad.github.io/feed.xml</id>
+<title type="html">matklad</title>
+<subtitle>Yet another programming blog by Alex Kladov aka matklad.</subtitle>
+<author><name>Alex Kladov</name></author>
+
+<entry>
+<title type="text">Unified Versus Split Diff</title>
+<link href="https://matklad.github.io/2023/10/23/unified-vs-split-diff.html" rel="alternate" type="text/html" title="Unified Versus Split Diff" />
+<published>2023-10-23T00:00:00+00:00</published>
+<updated>2023-10-23T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/10/23/unified-vs-split-diff</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[Which is better for code reviews, a unified diff or a split diff?]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/10/23/unified-vs-split-diff.html"><![CDATA[
+    <h1>
+    <a href="#Unified-Versus-Split-Diff"><span>Unified Versus Split Diff</span> <time datetime="2023-10-23">Oct 23, 2023</time></a>
+    </h1>
+<p><span>Which is better for code reviews, a unified diff or a split diff?</span></p>
+<p><span>A split diff looks like this for me:</span></p>
+
+<figure>
+
+<img alt="" src="https://user-images.githubusercontent.com/1711539/277481233-026508cf-47ed-4897-934a-fee18b708553.png">
+</figure>
+<p><span>And this is a unified one:</span></p>
+
+<figure>
+
+<img alt="" src="https://user-images.githubusercontent.com/1711539/277481510-12ee62af-0305-412b-9f37-57a37744751b.png">
+</figure>
+<p><span>If the changes are simple and small, both views are good. But for larger, more complex changes</span>
+<span>neither works for me.</span></p>
+<p><span>For a large change, I don</span>&rsquo;<span>t want to do a </span>&ldquo;<span>diff review</span>&rdquo;<span>, I want to do a proper code review of a</span>
+<span>codebase at a particular instant in time, paying specific attention to the recently changed areas,</span>
+<span>but mostly just doing general review, as if I am writing the code. I need to run tests, use goto</span>
+<span>definition and other editor navigation features, apply local changes to check if some things could</span>
+<span>have been written differently, look at the wider context to notice things that </span><em><span>should</span></em><span> have been</span>
+<span>changed, and in general notice anything that might be not quite right with the codebase,</span>
+<span>irrespective of the historical path to the current state of the code.</span></p>
+<p><span>So, for me, the ideal diff view would look rather like this:</span></p>
+
+<figure>
+
+<img alt="" src="https://user-images.githubusercontent.com/1711539/277485436-5e9ff9d5-325b-4e2c-8285-4acb6a8c088b.png">
+</figure>
+<p><span>On the left, the current state of the code (which is also the on-disk state), with changes subtly</span>
+<span>highlighted in the margins. On the right, the unified diff for the portion of the codebase currently</span>
+<span>visible on the left.</span></p>
+<p><span>Sadly, this format of review isn</span>&rsquo;<span>t well supported by the tools </span>&mdash;<span> everyone seems to be happy</span>
+<span>reviewing diffs, rather than the actual code?</span></p>
+<p><span>I have a low-tech and pretty inefficient workflow for this style of review. A </span><a href="https://github.com/matklad/config/blob/master/xtool/src/gpr.rs"><code>gpr</code>
+<span>script</span></a><span> for checking out a pull</span>
+<span>request locally:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-title function_">$</span> gpr 1234 --review</span></code></pre>
+
+</figure>
+<p><span>Internally, it does roughly</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-title function_">$</span> git fetch upstream refs/pull/1234/head</span>
+<span class="line"><span class="hl-title function_">$</span> git switch --detach FETCH_HEAD</span>
+<span class="line"><span class="hl-title function_">$</span> git reset $(git merge-base HEAD main)</span></code></pre>
+
+</figure>
+<p><span>The last line is the key </span>&mdash;<span> it erases all the commits from the pull request, but keeps all of the</span>
+<span>changes. This lets me abuse my workflow for staging&amp;committing to do a code review </span>&mdash;
+<a href="https://github.com/kahole/edamagit"><span>edamagit</span></a><span> shows the list of changed files, I get </span>&ldquo;<span>go to</span>
+<span>next/previous change</span>&rdquo;<span> shortcuts in the editor, I can even use the staging area to mark hunks I have</span>
+<span>reviewed.</span></p>
+<p><span>The only thing I </span><em><span>don</span>&rsquo;<span>t</span></em><span> get is automatic synchronization between magit status buffer, and the file</span>
+<span>that</span>&rsquo;<span>s currently open in the editor. That is, to view the current file and the diff on the side, I</span>
+<span>have to manually open the diff and scroll it to the point I am currently looking at.</span></p>
+<p><span>I wish it was easier to get this close to the code without building custom ad-hoc tools!</span></p>
+<p><span>P.S. This post talks about how to review code, but reviewing the code is not necessary the primary</span>
+<span>goal of code review. See this related post:</span>
+<a href="https://matklad.github.io/2021/01/03/two-kinds-of-code-review.html"><em><span>Two Kinds of Code Review</span></em></a><span>.</span></p>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">Unless Explicitly Specified Otherwise, Open Source Software With Users Carries Moral Obligations</title>
+<link href="https://matklad.github.io/2023/10/18/obligations.html" rel="alternate" type="text/html" title="Unless Explicitly Specified Otherwise, Open Source Software With Users Carries Moral Obligations" />
+<published>2023-10-18T00:00:00+00:00</published>
+<updated>2023-10-18T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/10/18/obligations</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[My thoughts on the topic of whether maintainers owe you anything. Speaking as an author, a maintainer,
+a user of, and a contributor to open-source software.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/10/18/obligations.html"><![CDATA[
+    <h1>
+    <a href="#Unless-Explicitly-Specified-Otherwise-Open-Source-Software-With-Users-Carries-Moral-Obligations"><span>Unless Explicitly Specified Otherwise, Open Source Software With Users Carries Moral Obligations</span> <time datetime="2023-10-18">Oct 18, 2023</time></a>
+    </h1>
+<p><span>My thoughts on the topic of whether maintainers owe you anything. Speaking as an author, a maintainer,</span>
+<span>a user of, and a contributor to open-source software.</span></p>
+<p><span>Let</span>&rsquo;<span>s start with a thing which I find obvious and non-negotiable: I can</span>&rsquo;<span>t lie in my README.md.</span></p>
+<p><span>I can</span>&rsquo;<span>t write </span>&ldquo;<span>this software is reliable, fast, and secure</span>&rdquo;<span> if in fact my software is slow,</span>
+<span>crashes, and comes with a backdoor pre-installed. More generally, if I promise something in the</span>
+<span>readme, I</span>&rsquo;<span>d better follow up on the promise and be ready to apologize if I fail.</span></p>
+<p><span>If I create expectations between me and my users, I am on the hook for conforming to them.</span></p>
+<p><span>The subtle point here is, if I make an Open Source Project, push it to some forge, write a nice</span>
+<span>readme explaining why one would want to use it, provide one-liner for installation, and publish</span>
+<span>builds to some package registries, I am already creating some expectations. The act of inviting</span>
+<span>users (and writing usage instructions aimed at a general audience </span><em><span>is</span></em><span> an act of inviting users)</span>
+<span>forms an agreement between me as a maintainer and the user.</span></p>
+<p><span>Expectations, but how great? Let</span>&rsquo;<span>s say that tomorrow at this place I am run over by an automobile.</span>
+<span>That would be a tragedy for many reasons! But should I worry, on top of all that, that I can no</span>
+<span>longer swiftly react to vulnerabilities reported against my open-source software? Obviously not! And</span>
+<span>that</span>&rsquo;<span>s the bound on expectations here: it is absolutely ok for a maintainer to do absolutely</span>
+<span>nothing.</span></p>
+<p><span>At the same time, if I publish a project, write a nice readme, provide installation instructions,</span>
+<span>etc, and then add a backdoor to my software, I am wrong. Yes, I didn</span>&rsquo;<span>t explicitly mention in the</span>
+<span>readme that I am not going to add a backdoor. Still, there is a basic, implicit expectation about</span>
+<span>software security, and it is wrong for me to violate it without an explicit mention.</span></p>
+<p><span>So I think the default expectations for a published open-source project boil down to:</span></p>
+<ul>
+<li>
+<span>As a maintainer, I can do absolutely nothing, and that</span>&rsquo;<span>s OK.</span>
+</li>
+<li>
+<span>At the same time, I can not be actively hostile to my users.</span>
+</li>
+<li>
+<span>I can spell out any extra carve-outs in either direction in my README.md.</span>
+<span>E.g., if I promise that releases follow SemVer, I should try to make it so! Conversely, if I am</span>
+<span>implementing my own crypto for fun for credentials-handling software, it</span>&rsquo;<span>s ok for me to just</span>
+<span>prominently mention that in the documentation.</span>
+</li>
+</ul>
+<p><span>What about the license? Doesn</span>&rsquo;<span>t it say that THE SOFTWARE IS PROVIDED </span>&ldquo;<span>AS IS</span>&rdquo;<span>, WITHOUT WARRANTY OF</span>
+<span>ANY KIND, EXPRESS OR IMPLIED?</span></p>
+<p><span>It does, but that</span>&rsquo;<span>s a statement about legality, not ethicality. If my readme says that my software</span>
+<span>is fit for a particular purpose, while it actually (and subtly) isn</span>&rsquo;<span>t in a big way, my users have</span>
+<span>the moral right to be mad at me. They don</span>&rsquo;<span>t have the legal right to sue me though.</span></p>
+<p><span>So, if you, as an open-source maintainer, publish your software and gain users, you should ask</span>
+<span>yourself: </span>&ldquo;<span>do I actually want to have users?</span>&rdquo;<span>. It is totally fine if the answer is </span>&ldquo;<span>no</span>&rdquo;<span>! It is a</span>
+<span>safe default answer and what governs most of the git repositories out there.</span></p>
+<p><span>Never the less, if the answer to question of users is </span>&ldquo;<span>no</span>&rdquo;<span>, you should make it clear in your Readme</span>
+<span>that it is a hobby, non-production-ready project which isn</span>&rsquo;<span>t intended to be used by anyone but you.</span>
+<span>Usually, it</span>&rsquo;<span>s enough to just not have a readme at all, or have a very short readme which makes it</span>
+<span>obvious that the project isn</span>&rsquo;<span>t supported.</span></p>
+<p><span>However, if you do have a nice README with installation instructions and such, that constitutes a</span>
+&ldquo;<span>yes</span>&rdquo;<span> answer. And then you, as a maintainer, are responsible for a tiny bit of life of your</span>
+<span>explicitly invited users. It</span>&rsquo;<span>s not expected that you do much (in fact, doing nothing is totally OK),</span>
+<span>but the amount of expectation is greater than zero.</span></p>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">LSP could have been better</title>
+<link href="https://matklad.github.io/2023/10/12/lsp-could-have-been-better.html" rel="alternate" type="text/html" title="LSP could have been better" />
+<published>2023-10-12T00:00:00+00:00</published>
+<updated>2023-10-12T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/10/12/lsp-could-have-been-better</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[We talk about programming like it is about writing code, but the code ends up being less important
+than the architecture, and the architecture ends up being less important than social issues.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/10/12/lsp-could-have-been-better.html"><![CDATA[
+    <h1>
+    <a href="#LSP-could-have-been-better"><span>LSP could have been better</span> <time datetime="2023-10-12">Oct 12, 2023</time></a>
+    </h1>
+
+<figure class="blockquote">
+<blockquote><p><span>We talk about programming like it is about writing code, but the code ends up being less important</span>
+<span>than the architecture, and the architecture ends up being less important than social issues.</span></p>
+</blockquote>
+<figcaption><cite><a href="https://neugierig.org/software/blog/2020/05/ninja.html"><span>The Success and Failure of Ninja</span></a></cite></figcaption>
+</figure>
+<p><span>The  </span><a href="https://matklad.github.io/2022/04/25/why-lsp.html"><em><span>Why LSP</span></em></a><span> post discusses the </span>&ldquo;<span>social</span>
+<span>issues</span>&rdquo;<span> solved by LSP. LSP (as a part of overarching Microsoft strategy) is brilliant, because it</span>
+<span>moved the world to a new equilibrium where not having basic IDE support is frowned upon. This post</span>
+<span>instead discusses architectural aspects of LSP, which I personally find not as brilliant(especially given that</span>
+<a href="https://htmlpreview.github.io/?https://github.com/dart-lang/sdk/blob/8e6a02d899ef62ef5b8405518b36340e609198e2/pkg/analysis_server/doc/api.html"><span>Dart Analysis Protocol</span></a>
+<span>predates LSP and is technically superior in some aspects). Perhaps it</span>
+<span>could be useful for someone designing other LSP-shaped protocols! Note that it</span>&rsquo;<span>s been couple of</span>
+<span>years since I was actively involved in LSP, probably the grass is greener these days!</span></p>
+<p><span>Let</span>&rsquo;<span>s get to the list of properties, good and bad, in no particular order.</span></p>
+<section id="Focus-on-Presentation">
+
+    <h2>
+    <a href="#Focus-on-Presentation"><span>Focus on Presentation</span> </a>
+    </h2>
+<p><span>And let</span>&rsquo;<span>s start with an aspect of the architecture which is genius, and which, I think, is</span>
+<span>responsible for a big share of LSP success on the technical side. If you build a tool for working</span>
+<span>with </span><em><span>multiple</span></em><span> programming languages, one of the biggest questions is how to find common ground</span>
+<span>among different, but ultimately similar, languages. A first attempt is to uncover essential</span>
+<span>commonality: after all, all languages have files, variables, functions, classes, right? This is </span>&hellip;
+<span>maybe not necessary a dead end, but definitely a thorny and treacherous path </span>&mdash;<span> languages are</span>
+<span>different, each language is weird in at least some of its aspects, and common ground risks to level</span>
+<span>away meaningful distinctions.</span></p>
+<p><span>So, what does LSP do here? It just doesn</span>&rsquo;<span>t provide a semantic model of the code base. Instead, it is</span>
+<span>focused squarely on the presentation. No matter how different each programming language is, they</span>
+<span>all, in the end, use the same completion widget. So LSP is formulated in terms of what</span>&rsquo;<span>s shown in</span>
+<span>the completion widget, not in terms of the underlying semantic language entities. That means that</span>
+<span>each language has an internal semantic model which is full fidelity </span><em><span>for this particular language</span></em><span>,</span>
+<span>and uses it to provide the best completion experience which is possible for a given completion</span>
+<span>widget. This is how rust-analyzer is structured internally as well:</span></p>
+<ol>
+<li>
+<span>Compiler layer deals with the messy language analysis tasks, it derives more structured</span>
+<span>information (types) from less structured information (source text), explicitly tracking analysis</span>
+<span>layers and phases.</span>
+</li>
+<li>
+<span>The HIR (high-level intermediate representation) is a façade around the compiler, which provides</span>
+<span>a rich graph-based object model of code which looks as if all derived information, like types, is</span>
+<span>pre-computed.</span>
+</li>
+<li>
+<span>The IDE layer uses HIR to compute things like completions, and presents them as Rust-specific,</span>
+<span>but semantics-less POD structures to be shown to the user in GUI more or less as is.</span>
+</li>
+</ol>
+<p><span>One consequence of this architecture is that LSP requests map to editor widgets, and not to the</span>
+<span>underlying language concepts, even when several different widgets are powered by the same underlying</span>
+<span>data. For example, LSP has separate requests for:</span></p>
+<ul>
+<li>
+<span>hierarchical outline of a file displayed in the side bar,</span>
+</li>
+<li>
+&ldquo;<span>breadcrumbs</span>&rdquo;<span> shown in the header,</span>
+</li>
+<li>
+<span>syntax-aware selection ranges,</span>
+</li>
+<li>
+<span>code folding.</span>
+</li>
+</ul>
+<p><span>Although all four features are just different views into an AST, there</span>&rsquo;<span>s no </span>&ldquo;<span>get AST</span>&rdquo;<span> request in the</span>
+<span>LSP. Different requests allow to fine-tune presentation for the  different use-cases, and the</span>
+<span>details do differ! Semantic selection might contain some sub-syntax ranges inside string literals</span>
+<span>and comments, breadcrumb need to include things like conditionals of </span><code>if</code><span> expressions, while the</span>
+<span>outline might want to get rid of less important nodes. Attentive reader will notice that breadcrumbs</span>
+<span>and the outline actually use the same LSP request. Even LSP doesn</span>&rsquo;<span>t follow LSP philosophy fully!</span></p>
+</section>
+<section id="Transport">
+
+    <h2>
+    <a href="#Transport"><span>Transport</span> </a>
+    </h2>
+<p><span>After a big thing that LSP did right, let</span>&rsquo;<span>s look at a small thing that it got wrong. Let</span>&rsquo;<span>s look at</span>
+<span>how information is transmitted over the wire.</span></p>
+<p><span>JSON is actually OK! Many people complain that JSON is slow, but that</span>&rsquo;<span>s not actually the case</span>
+<span>generally. There are some edge cases, where particular client libraries can be slow as was the case</span>
+<span>at least at some point with Swift and Emacs, but JSON is definitely fast enough for Rust, Java and</span>
+<span>JavaScript. Of course, something substantially better than JSON is possible in </span><em><span>theory</span></em><span>.</span></p>
+<p><span>I think ideally we need </span>&ldquo;<span>WebAssembly for IPC</span>&rdquo;<span>, a format that:</span></p>
+<ul>
+<li>
+<span>has dual text and binary encoding,</span>
+</li>
+<li>
+<span>is stupidly simple,</span>
+</li>
+<li>
+<span>is thoroughly, readably, and precisely specified,</span>
+</li>
+<li>
+<span>and, in general, is principled and a joy to use.</span>
+</li>
+</ul>
+<p><span>There</span>&rsquo;<span>s no such format yet, so JSON it is. Good enough.</span></p>
+<p><span>HTTP framing is not OK. On the wire, the messages framed like this:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">Content-Length: 92 \r\n</span>
+<span class="line">\r\n</span>
+<span class="line">Actual message</span></code></pre>
+
+</figure>
+<p><span>That is:</span></p>
+<ul>
+<li>
+<span>case-insensitive </span>&ldquo;<span>content-length</span>&rdquo;<span> header,</span>
+</li>
+<li>
+<span>followed by length of the following message, formatted as a decimal number in ASCII,</span>
+</li>
+<li>
+<span>followed by double </span><code>\r\n</code><span>,</span>
+</li>
+<li>
+<span>followed by the actual message.</span>
+</li>
+</ul>
+<p><span>This resembles HTTP, but is not actual HTTP, so you need to write a bit of custom code to deal</span>
+<span>with the framing. That</span>&rsquo;<span>s not hard:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">size</span> = <span class="hl-literal">None</span>;</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">buf</span> = <span class="hl-type">String</span>::<span class="hl-title function_ invoke__">new</span>();</span>
+<span class="line">  <span class="hl-keyword">loop</span> {</span>
+<span class="line">    buf.<span class="hl-title function_ invoke__">clear</span>();</span>
+<span class="line">    <span class="hl-keyword">if</span> inp.<span class="hl-title function_ invoke__">read_line</span>(&amp;<span class="hl-keyword">mut</span> buf)? == <span class="hl-number">0</span> {</span>
+<span class="line">      <span class="hl-keyword">return</span> <span class="hl-title function_ invoke__">Ok</span>(<span class="hl-literal">None</span>);</span>
+<span class="line">    }</span>
+<span class="line">    <span class="hl-keyword">if</span> !buf.<span class="hl-title function_ invoke__">ends_with</span>(<span class="hl-string">&quot;\r\n&quot;</span>) {</span>
+<span class="line">      <span class="hl-keyword">return</span> <span class="hl-title function_ invoke__">Err</span>(invalid_data!(<span class="hl-string">&quot;malformed header: {:?}&quot;</span>, buf));</span>
+<span class="line">    }</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-variable">buf</span> = &amp;buf[..buf.<span class="hl-title function_ invoke__">len</span>() - <span class="hl-number">2</span>];</span>
+<span class="line">    <span class="hl-keyword">if</span> buf.<span class="hl-title function_ invoke__">is_empty</span>() {</span>
+<span class="line">      <span class="hl-keyword">break</span>;</span>
+<span class="line">    }</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">parts</span> = buf.<span class="hl-title function_ invoke__">splitn</span>(<span class="hl-number">2</span>, <span class="hl-string">&quot;: &quot;</span>);</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-variable">header_name</span> = parts.<span class="hl-title function_ invoke__">next</span>().<span class="hl-title function_ invoke__">unwrap</span>();</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-variable">header_value</span> = parts.<span class="hl-title function_ invoke__">next</span>().<span class="hl-title function_ invoke__">ok_or_else</span>(|| {</span>
+<span class="line">      invalid_data!(<span class="hl-string">&quot;malformed header: {:?}&quot;</span>, buf)</span>
+<span class="line">    })?;</span>
+<span class="line">    <span class="hl-keyword">if</span> header_name.<span class="hl-title function_ invoke__">eq_ignore_ascii_case</span>(<span class="hl-string">&quot;Content-Length&quot;</span>) {</span>
+<span class="line">      size = <span class="hl-title function_ invoke__">Some</span>(</span>
+<span class="line">        header_value.parse::&lt;<span class="hl-type">usize</span>&gt;().<span class="hl-title function_ invoke__">map_err</span>(invalid_data)?,</span>
+<span class="line">      );</span>
+<span class="line">    }</span>
+<span class="line">  }</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">size</span>: <span class="hl-type">usize</span> =</span>
+<span class="line">    size.<span class="hl-title function_ invoke__">ok_or_else</span>(|| invalid_data!(<span class="hl-string">&quot;no Content-Length&quot;</span>))?;</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">buf</span> = buf.<span class="hl-title function_ invoke__">into_bytes</span>();</span>
+<span class="line">  buf.<span class="hl-title function_ invoke__">resize</span>(size, <span class="hl-number">0</span>);</span>
+<span class="line">  inp.<span class="hl-title function_ invoke__">read_exact</span>(&amp;<span class="hl-keyword">mut</span> buf)?;</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">buf</span> = <span class="hl-type">String</span>::<span class="hl-title function_ invoke__">from_utf8</span>(buf).<span class="hl-title function_ invoke__">map_err</span>(invalid_data)?;</span></code></pre>
+
+</figure>
+<p><span>But, still, decoding ASCII message length from variable-length header? That</span>&rsquo;<span>s accidental complexity.</span>
+<span>Just separate json objects with newlines instead:</span></p>
+<p><a href="https://jsonlines.org" class="url">https://jsonlines.org</a></p>
+<p><span>Framing using </span><code>\n</code><span> as a separator is almost certainly available out of the box in the programming</span>
+<span>language of choice.</span></p>
+<p><span>Wiping away the tears and peeling one more layer from the onion, we see json-rpc:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-punctuation">{</span></span>
+<span class="line">    <span class="hl-attr">&quot;jsonrpc&quot;</span><span class="hl-punctuation">:</span> <span class="hl-string">&quot;2.0&quot;</span><span class="hl-punctuation">,</span></span>
+<span class="line">    <span class="hl-attr">&quot;method&quot;</span><span class="hl-punctuation">:</span> <span class="hl-string">&quot;initialize&quot;</span><span class="hl-punctuation">,</span></span>
+<span class="line">    <span class="hl-attr">&quot;id&quot;</span><span class="hl-punctuation">:</span> <span class="hl-number">1</span><span class="hl-punctuation">,</span></span>
+<span class="line">    <span class="hl-attr">&quot;params&quot;</span><span class="hl-punctuation">:</span> <span class="hl-punctuation">{</span> ... <span class="hl-punctuation">}</span></span>
+<span class="line"><span class="hl-punctuation">}</span></span></code></pre>
+
+</figure>
+<p><span>This again is a bit of needless accidental complexity. Again, not hard to handle:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">_write</span>(<span class="hl-keyword">self</span>, w: &amp;<span class="hl-keyword">mut</span> <span class="hl-keyword">dyn</span> Write) <span class="hl-punctuation">-&gt;</span> io::<span class="hl-type">Result</span>&lt;()&gt; {</span>
+<span class="line">  <span class="hl-meta">#[derive(Serialize)]</span></span>
+<span class="line">  <span class="hl-keyword">struct</span> <span class="hl-title class_">JsonRpc</span> {</span>
+<span class="line">    jsonrpc: &amp;<span class="hl-symbol">&#x27;static</span> <span class="hl-type">str</span>,</span>
+<span class="line">    <span class="hl-meta">#[serde(flatten)]</span></span>
+<span class="line">    msg: Message,</span>
+<span class="line">  }</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">text</span> = serde_json::<span class="hl-title function_ invoke__">to_string</span>(&amp;JsonRpc {</span>
+<span class="line">    jsonrpc: <span class="hl-string">&quot;2.0&quot;</span>,</span>
+<span class="line">    msg: <span class="hl-keyword">self</span>,</span>
+<span class="line">  })?;</span>
+<span class="line">  <span class="hl-title function_ invoke__">write_msg_text</span>(w, &amp;text)</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>But:</span></p>
+<ul>
+<li>
+<span>Prone to complexity amplification, invites jsonrpc framework with all the latest patterns.</span>
+</li>
+<li>
+<code>"jsonrpc": "2.0"</code><span> is meaningless noise which you have to look at during debugging.</span>
+</li>
+<li>
+<span>Error codes like </span><code>-32601</code><span> (ah, that comes from xml-rpc!).</span>
+</li>
+<li>
+<span>Includes notifications. Notification are a big anti-pattern in RPC, for a somewhat subtle reason.</span>
+<span>More on this later.</span>
+</li>
+</ul>
+<p><span>What to do instead? Do what Dart does, some excerpts from </span><a href="https://htmlpreview.github.io/?https://github.com/dart-lang/sdk/blob/8e6a02d899ef62ef5b8405518b36340e609198e2/pkg/analysis_server/doc/api.html"><span>the specification</span></a><span>:</span></p>
+
+<figure class="blockquote">
+<blockquote><p><span>Messages are delineated by newlines. This means,</span>
+<span>in particular, that the JSON encoding process must not introduce newlines within a message. Note</span>
+<span>however that newlines are used in this document for readability.</span></p>
+<p><span>To ease interoperability with Lisp-based clients (which may not be able to easily distinguish</span>
+<span>between empty lists, empty maps, and null), client-to-server communication is allowed to replace any</span>
+<span>instance of </span>&ldquo;<code>{}</code>&rdquo;<span> or </span>&ldquo;<code>[]</code>&rdquo;<span> with null. The server will always properly represent empty lists as </span>&ldquo;<code>[]</code>&rdquo;
+<span>and empty maps as </span>&ldquo;<code>{}</code>&rdquo;<span>.</span></p>
+<p><span>Clients can make a request of the server and the server will provide a response for each request</span>
+<span>that it receives. </span><strong><span>While many of the requests that can be made by a client are informational in</span>
+<span>nature, we have chosen to always return a response so that clients can know whether the request was</span>
+<span>received and was correct.</span></strong></p>
+<p><span>Example request:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">request: {</span>
+<span class="line">  "id": String</span>
+<span class="line">  "method": "server.getVersion"</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line">response: {</span>
+<span class="line">  "id": String</span>
+<span class="line">  "error": optional RequestError</span>
+<span class="line">  "result": {</span>
+<span class="line">    "version": String</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+</blockquote>
+
+</figure>
+<p><span>That</span>&rsquo;<span>s basically jsonrpc, the good parts, including using </span><code>"UNKNOWN_REQUEST"</code><span> instead of </span><code>-32601</code><span>.</span></p>
+</section>
+<section id="Coordinates">
+
+    <h2>
+    <a href="#Coordinates"><span>Coordinates</span> </a>
+    </h2>
+<p><span>LSP uses </span><code>(line, column)</code><span> pairs for coordinates. The neat thing here is that this solves significant</span>
+<span>chunk of </span><code>\n</code><span> vs </span><code>\r\n</code><span> problems </span>&mdash;<span> client and server may represent line endings differently, but</span>
+<span>this doesn</span>&rsquo;<span>t matter, because coordinates are the same.</span></p>
+<p><span>Focus on the presentation provides another motivation, because location information received by the</span>
+<span>client can be directly presented to the user, without the need to parse the underlying file. I have</span>
+<span>mixed feelings about this.</span></p>
+<p><span>The problem, </span><code>column</code><span> is counted using UTF-16 code units. This is, like, </span>&ldquo;<span>no</span>&rdquo;<span>. For many reasons,</span>
+<span>but in particular, UTF-16 is definitely the wrong number to show to the user as a </span>&ldquo;<span>column</span>&rdquo;<span>.</span></p>
+<p><span>There</span>&rsquo;<span>s no entirely obvious answer what should be used instead. My personal favorite would be</span>
+<span>counting utf-8 code units (so, just bytes). You need </span><em><span>some</span></em><span> coordinate space. Any reasonable</span>
+<span>coordinate space won</span>&rsquo;<span>t be useful for presentation, so you might as well use the space that matches</span>
+<span>the underlying utf-8 encoding, so that accessing substrings is O(1).</span></p>
+<p><span>Using unicode codepoints would perhaps be the most agreeable solution. Codepoints are useless </span>&mdash;
+<span>you</span>&rsquo;<span>ll need to convert to grapheme clusters for presentation, and to utf-8 code units to do anything</span>
+<span>with the string. Still, codepoints are a common denominator, they are more often correct if</span>
+<span>incorrectly used for presentation, and they have a nice property that any index less then length is</span>
+<span>valid irrespective of the actual string.</span></p>
+</section>
+<section id="Causality-Casualty">
+
+    <h2>
+    <a href="#Causality-Casualty"><span>Causality Casualty</span> </a>
+    </h2>
+<p><span>As mentioned above, one drawback of one-way notifications from jsonrpc is that they don</span>&rsquo;<span>t allow</span>
+<span>signaling errors. But there</span>&rsquo;<span>s a more subtle problem here: because you don</span>&rsquo;<span>t receive response to a</span>
+<span>notification, it might be hard to order it relative to other events. The Dart protocol is pretty</span>
+<span>strict about the ordering of events:</span></p>
+
+<figure class="blockquote">
+<blockquote><p><span>There is no guarantee concerning the order in which responses will be returned, but there is a</span>
+<span>guarantee that the server will process requests in the order in which they are sent as long as the</span>
+<span>transport mechanism also makes this guarantee.</span></p>
+</blockquote>
+
+</figure>
+<p><span>This guarantee ensures that the client and the server mutually understand each other</span>&rsquo;<span>s state. For</span>
+<span>every request the client knows which file modifications happened before it, and which came afterwards.</span></p>
+<p><span>In LSP, when the client wants to modify the state of a file on the server, it sends a notification.</span>
+<span>LSP also supports server-initiated edits. Now, if the client sends a </span><code>didChangeTextDocument</code>
+<span>notification, and then receives a </span><code>workspace/applyEdit</code><span> request from the server, there</span>&rsquo;<span>s no way for</span>
+<span>the client to know whether the edit takes the latest change into the account or not. Were</span>
+<code>didChangeTextDocument</code><span> a request instead, the client could have looked at the relative order of the</span>
+<span>corresponding response and </span><code>workspace/applyEdit</code><span>.</span></p>
+<p><span>LSP papers over this fundamental loss of causality by including numeric versions of the documents</span>
+<span>with every edit, but this is a best effort solution. Edits might be invalidated by changes to</span>
+<span>unrelated documents. For example, for a rename refactor, if a new usage was introduced in a new file</span>
+<span>after the refactor was computed, version numbers of the changed files would wrongly tell you that</span>
+<span>the edit is still correct, while it will miss this new usage.</span></p>
+<p><span>Practically, this is a small problem </span>&mdash;<span> it works most of the  time (I </span><em><span>think</span></em><span> I have seen zero</span>
+<span>actual bugs caused by causality loss), and even the proper solution can</span>&rsquo;<span>t order events originating</span>
+<span>from the client relative to the events originating from the file system. But the fix is also very</span>
+<span>simple </span>&mdash;<span> just don</span>&rsquo;<span>t voluntarily lose causality links!</span></p>
+</section>
+<section id="Remote-Procedural-State-Synchronization">
+
+    <h2>
+    <a href="#Remote-Procedural-State-Synchronization"><span>Remote Procedural State Synchronization</span> </a>
+    </h2>
+<p><span>And this touches what I think is the biggest architectural issue with LSP. LSP is an RPC protocol</span>
+&mdash;<span> it is formed by </span>&ldquo;<span>edge triggered</span>&rdquo;<span> requests that make something happen on the other side. But this</span>
+<span>is not how most of IDE features work. What actually is needed is </span>&ldquo;<span>level triggered</span>&rdquo;<span> </span><strong><span>state</span>
+<span>synchronization</span></strong><span>. The client and the server need to agree what something </span><em><span>is</span></em><span>, deciding the course</span>
+<span>of action is secondary. It is </span>&ldquo;<span>to be or not to be</span>&rdquo;<span> rather than </span>&ldquo;<span>what is to be done</span>&rdquo;<span>.</span></p>
+<p><span>At the bottom is synchronization of text documents </span>&mdash;<span> the server and the client need to agree which</span>
+<span>files there are, and what is their content.</span></p>
+<p><span>Above is synchronization of derived data. For example, there</span>&rsquo;<span>s a set of errors in the project. This</span>
+<span>set changes when the underlying text files change. Errors change with some lag, as it takes time to</span>
+<span>compute them (and sometimes files changes faster than the errors could be re-computed).</span></p>
+<p><span>Things like file outline, syntax highlighting, cross-reference information, e.t.c, all follow the</span>
+<span>same pattern.</span></p>
+<p><span>Crucially, predicting which changes to the source invalidate which derived data requires language</span>
+<span>specific knowledge. Changing the text of </span><code>foo.rs</code><span> might affect syntax highlighting in </span><code>bar.rs</code><span> (as</span>
+<span>syntax highlighting is affected by types).</span></p>
+<p><span>In LSP, highlighting and such are requests. This means that either the client is incorrect and shows</span>
+<span>stale highlighting results, or it conservatively re-queries all highlighting results after every</span>
+<span>change, wasting the CPU, and </span><em><span>still</span></em><span> showing stale results sometimes, when an update happens outside</span>
+<span>of the client (eg, when </span><code>cargo</code><span> finished downloading external crates).</span></p>
+<p><span>The Dart model is more flexible, performant and elegant. Instead of highlighting being a request, it</span>
+<span>is a </span><em><span>subscription</span></em><span>. The client subscribes to syntax highlighting of particular files, the server</span>
+<span>notifies the client whenever highlights for the selected files change. That is, two pieces of state</span>
+<span>are synchronized between the client and the server:</span></p>
+<ul>
+<li>
+<span>The set of file the client is subscribed to</span>
+</li>
+<li>
+<span>The actual state of syntax highlighting for these files.</span>
+</li>
+</ul>
+<p><span>The former is synchronized by sending the whole </span>&ldquo;<span>current set</span>&rdquo;<span> of files in a request, whenever the</span>
+<span>set changes. The latter is synchronized by sending incremental updates.</span></p>
+<p><span>Subscriptions are granular both in terms of the file set, as well as in terms of features. The</span>
+<span>client might subscribe for errors in the whole project, and for highlights in the currently opened</span>
+<span>documents only.</span></p>
+<p><span>Subscriptions are implemented in terms of RPC, but they are an overarching organizational pattern</span>
+<span>followed by the majority of the requests. LSP doesn</span>&rsquo;<span>t have an equivalent, and has real bugs with</span>
+<span>outdated information shown to the user.</span></p>
+<p><span>I don</span>&rsquo;<span>t think Dart goes as far as possible here. JetBrains Rider, if I understand correctly, does</span>
+<span>something smarter:</span></p>
+<p><a href="https://www.codemag.com/Article/1811091/Building-a-.NET-IDE-with-JetBrains-Rider" class="url">https://www.codemag.com/Article/1811091/Building-a-.NET-IDE-with-JetBrains-Rider</a></p>
+<p><span>I think the idea behind the rider protocol is that you directly define the state you want to</span>
+<span>synchronize between the client and the server as state. The protocol then manages </span>&ldquo;<span>magic</span>&rdquo;
+<span>synchronization of the state by sending minimal diffs.</span></p>
+</section>
+<section id="Simplistic-Refactorings">
+
+    <h2>
+    <a href="#Simplistic-Refactorings"><span>Simplistic Refactorings</span> </a>
+    </h2>
+<p><span>Let</span>&rsquo;<span>s unwind to something more down to earth, like refactorings. Not the simple ones, like rename,</span>
+<span>but complex ones, like </span>&ldquo;<span>change signature</span>&rdquo;<span>:</span></p>
+<p><a href="https://www.jetbrains.com/idea/guide/tips/change-signature/" class="url">https://www.jetbrains.com/idea/guide/tips/change-signature/</a></p>
+<p><span>In this refactoring, the user selects a function declaration, then rearranges</span>
+<span>parameters in some way (reorders, removes, adds, renames, changes types, whatever), and then the IDE</span>
+<span>fixes all call-sites.</span></p>
+<p><span>The thing that makes this refactor complex is that it is interactive </span>&mdash;<span> it</span>&rsquo;<span>s not an atomic request</span>
+&ldquo;<span>rename </span><code>foo</code><span> to </span><code>bar</code>&rdquo;<span>, it</span>&rsquo;<span>s a dialog between the IDE and the user. There are many parameters that</span>
+<span>the user tweaks based on the analysis of the original code and the already specified aspects of the</span>
+<span>refactoring.</span></p>
+<p><span>LSP doesn</span>&rsquo;<span>t support this workflows. Dart somewhat supports them, though each refactoring gets to use</span>
+<span>custom messages (that is, there</span>&rsquo;<span>s quite good overall protocol for multistep refactorings, but each</span>
+<span>refactoring essentially sends </span><code>any</code><span> over the wire, and the IDE on the other side hard-codes specific</span>
+<span>GUIs for specific refactorings). This per-refactoring work is not nice, but it is much better than</span>
+<span>not having these complex refactorings at all.</span></p>
+</section>
+<section id="Dynamic-Registration">
+
+    <h2>
+    <a href="#Dynamic-Registration"><span>Dynamic Registration</span> </a>
+    </h2>
+<p><span>A small one to conclude. Significant chunk of conceptual LSP complexity comes from support for</span>
+<span>dynamic registration of capabilities. I don</span>&rsquo;<span>t understand why that features is there, rust-analyzer</span>
+<span>uses dynamic registration only for specifying which files should be watched. And that would be much</span>
+<span>simpler if it used a plain request (or a subscription mechanism).</span></p>
+</section>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">UNIX Structured Concurrency</title>
+<link href="https://matklad.github.io/2023/10/11/unix-structured-concurrency.html" rel="alternate" type="text/html" title="UNIX Structured Concurrency" />
+<published>2023-10-11T00:00:00+00:00</published>
+<updated>2023-10-11T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/10/11/unix-structured-concurrency</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[A short note on a particular structured concurrency pattern for UNIX systems programming.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/10/11/unix-structured-concurrency.html"><![CDATA[
+    <h1>
+    <a href="#UNIX-Structured-Concurrency"><span>UNIX Structured Concurrency</span> <time datetime="2023-10-11">Oct 11, 2023</time></a>
+    </h1>
+<p><span>A short note on a particular structured concurrency pattern for UNIX systems programming.</span></p>
+<section id="The-pattern">
+
+    <h2>
+    <a href="#The-pattern"><span>The pattern</span> </a>
+    </h2>
+
+<aside class="block">
+
+<p><span>If you have a parent process and a child process, and want to ensure that, when the parent</span>
+<span>stops, the child is stopped as well, consider using </span>&ldquo;<span>stdin is closed</span>&rdquo;<span> as an exit condition in the child.</span></p>
+
+</aside>
+  <p><span>That is, in the child process (which you control), do a blocking read on </span><code>stdin</code><span>, and exit promptly</span>
+<span>if the read returned zero bytes.</span></p>
+<p><span>Example of the pattern from one of the side hacks:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">main</span>() <span class="hl-punctuation">-&gt;</span> anyhow::<span class="hl-type">Result</span>&lt;()&gt; {</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">args</span> = Args::<span class="hl-title function_ invoke__">parse</span>()?;</span>
+<span class="line"></span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">token</span> = CancellationToken::<span class="hl-title function_ invoke__">new</span>();</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">_guard</span> = token.<span class="hl-title function_ invoke__">clone</span>().<span class="hl-title function_ invoke__">drop_guard</span>();</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">_watchdog_thread</span> = std::thread::<span class="hl-title function_ invoke__">spawn</span>({</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-variable">token</span> = token.<span class="hl-title function_ invoke__">clone</span>();</span>
+<span class="line">    <span class="hl-keyword">move</span> || <span class="hl-title function_ invoke__">run_watchdog</span>(token)</span>
+<span class="line">  });</span>
+<span class="line"></span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">tcp_socket</span> = TcpListener::<span class="hl-title function_ invoke__">bind</span>(args.addr.sock)?;</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">udp_socket</span> = UdpSocket::<span class="hl-title function_ invoke__">bind</span>(args.addr.sock)?;</span>
+<span class="line">  <span class="hl-built_in">println!</span>(<span class="hl-string">&quot;listening on {}&quot;</span>, args.addr.sock);</span>
+<span class="line">  <span class="hl-title function_ invoke__">run</span>(args, &amp;token, tcp_socket, udp_socket)</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">run_watchdog</span>(token: CancellationToken) {</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">_guard</span> = token.<span class="hl-title function_ invoke__">drop_guard</span>();</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">stdin</span> = std::io::<span class="hl-title function_ invoke__">stdin</span>();</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">stdin</span> = stdin.<span class="hl-title function_ invoke__">lock</span>();</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">buf</span> = [<span class="hl-number">0</span>];</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">n</span> = stdin.<span class="hl-title function_ invoke__">read</span>(&amp;<span class="hl-keyword">mut</span> buf).<span class="hl-title function_ invoke__">unwrap</span>();</span>
+<span class="line">  <span class="hl-keyword">if</span> n != <span class="hl-number">0</span> {</span>
+<span class="line">    <span class="hl-built_in">panic!</span>(<span class="hl-string">&quot;unexpected input&quot;</span>);</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+</section>
+<section id="Context">
+
+    <h2>
+    <a href="#Context"><span>Context</span> </a>
+    </h2>
+<p><span>Two bits of background reading here:</span></p>
+<p><span>A famous </span><del><span>novel by Leo Tolstoy</span></del><span> blog post by njs:</span></p>
+<p><a href="https://vorpus.org/blog/notes-on-structured-concurrency-or-go-statement-considered-harmful/" class="url">https://vorpus.org/blog/notes-on-structured-concurrency-or-go-statement-considered-harmful/</a></p>
+<p><span>A less famous, but no less classic, gotchas.md from duct.py:</span></p>
+<p><a href="https://github.com/oconnor663/duct.py/blob/master/gotchas.md#killing-grandchild-processes" class="url">https://github.com/oconnor663/duct.py/blob/master/gotchas.md#killing-grandchild-processes</a></p>
+<p><span>It is often desirable to spawn a process, and make sure that, when the parent process exits, the</span>
+<span>child process is also killed. This can </span><em><span>not</span></em><span> be achieved using a pattern equivalent to</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">try {</span>
+<span class="line">    process = spawn(...)</span>
+<span class="line">} finally {</span>
+<span class="line">    _ = process.kill()</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>The parent process itself might be abruptly killed, and the finally blocks / destructors / atexit</span>
+<span>hooks are not run in this case.</span></p>
+<p><span>The natural habitat for this pattern are integration tests, where you often spawn external processes</span>
+<span>in large amounts, and expect occasional abrupt crashes.</span></p>
+<p><span>Sadly, as far as I know, UNIX doesn</span>&rsquo;<span>t provide an easy mechanism to bind the lifetimes of two</span>
+<span>processes thusly. There</span>&rsquo;<span>s process group mechanism, but it is one-level deep and is mostly reserved</span>
+<span>for the shell. There</span>&rsquo;<span>s </span><del><span>docker</span></del><span> cgroups, but that</span>&rsquo;<span>s a Linux-specific mechanism which isn</span>&rsquo;<span>t usually</span>
+<span>exposed by cross-platform standard libraries of various languages.</span></p>
+<p><span>The trick is using closed stdin as the signal for exit, as that is evenly supported by all platforms,</span>
+<span>doesn</span>&rsquo;<span>t require much code, and will do nearly the right thing most of the time.</span></p>
+<p><span>The drawbacks of this pattern:</span></p>
+<ul>
+<li>
+<span>It</span>&rsquo;<span>s cooperative in the child (you must control the code of the child process to inject the exit</span>
+<span>logic)</span>
+</li>
+<li>
+<span>It</span>&rsquo;<span>s somewhat cooperative in the parent: while exiting on standard input EOF will do the right</span>
+<span>thing most of the time, there are exceptions. For example, reading from </span><code>/dev/null</code><span> returns 0 (as</span>
+<span>opposed to blocking), and daemon processes often have their stdin set to </span><code>/dev/null</code><span>. Sadly,</span>
+<span>there</span>&rsquo;<span>s no </span><code class="display">/dev/reads-and-writes-block-forever</code>
+</li>
+<li>
+<span>It is not actually structured. Ideally, parent</span>&rsquo;<span>s exit should block on all descendants exiting, but</span>
+<span>that</span>&rsquo;<span>s not the case in this pattern. Still, it</span>&rsquo;<span>s good enough for cleaning up in tests!</span>
+</li>
+</ul>
+</section>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">What is an Invariant?</title>
+<link href="https://matklad.github.io/2023/10/06/what-is-an-invariant.html" rel="alternate" type="text/html" title="What is an Invariant?" />
+<published>2023-10-06T00:00:00+00:00</published>
+<updated>2023-10-06T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/10/06/what-is-an-invariant</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[I extolled the benefits of programming with invariants in a couple of recent posts.
+Naturally, I didn't explain what I think when I write invariant. This post fixes that.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/10/06/what-is-an-invariant.html"><![CDATA[
+    <h1>
+    <a href="#What-is-an-Invariant"><span>What is an Invariant?</span> <time datetime="2023-10-06">Oct 6, 2023</time></a>
+    </h1>
+<p><span>I extolled the benefits of programming with invariants in a couple of recent posts.</span>
+<span>Naturally, I didn</span>&rsquo;<span>t explain what I think when I write </span>&ldquo;<span>invariant</span>&rdquo;<span>. This post fixes that.</span></p>
+<p><span>There are at least three different concepts I label with </span>&ldquo;<span>invariant</span>&rdquo;<span>:</span></p>
+<ul>
+<li>
+<span>a general </span>&ldquo;<span>math</span>&rdquo;<span> mode of thinking, where you distinguish between fuzzy, imprecise thoughts and</span>
+<span>precise statements with logical meaning.</span>
+</li>
+<li>
+<span>a specific technique for writing correct code when programming in the small.</span>
+</li>
+<li>
+<span>when programming in the large, compact, viral, descriptive properties of the systems.</span>
+</li>
+</ul>
+<p><span>I wouldn</span>&rsquo;<span>t discuss the first point here </span>&mdash;<span> I don</span>&rsquo;<span>t know how to describe this better than </span>&ldquo;<span>that</span>
+<span>thing that you do when you solve non-trivial math puzzler</span>&rdquo;<span>. The bulk of the post describes the</span>
+<span>second bullet point, for which I think I have a perfect litmus test to explain exactly what I am</span>
+<span>thinking here. I also touch a bit on the last point in the end.</span></p>
+<p><span>So let</span>&rsquo;<span>s start with a </span><a href="https://research.swtch.com/hwmm"><span>litmus test program</span></a><span> to show invariants in</span>
+<span>the small in action:</span></p>
+
+<aside class="block">
+
+<p><span>Write a binary search variation which computes insertion point </span>&mdash;<span> the smallest index such that, if</span>
+<span>the new element is inserted at this index, the array remains sorted:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">insertion_point</span>(xs: &amp;[<span class="hl-type">i32</span>], x: <span class="hl-type">i32</span>) <span class="hl-punctuation">-&gt;</span> <span class="hl-type">usize</span></span></code></pre>
+
+</figure>
+
+</aside>
+  <p><span>You might want to write one yourself before proceeding. Here</span>&rsquo;<span>s an </span><a href="https://matklad.github.io/2021/11/07/generate-all-the-things.html"><span>exhaustive</span>
+<span>test</span></a><span> for this functionality,</span>
+<span>using </span><a href="https://crates.io/crates/exhaustigen"><span>exhaustigen crate</span></a><span>:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">main</span>() {</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">N</span> = <span class="hl-number">5</span>;</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">M</span> = <span class="hl-number">5</span>;</span>
+<span class="line"></span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">g</span> = exhaustigen::Gen::<span class="hl-title function_ invoke__">new</span>();</span>
+<span class="line">  <span class="hl-keyword">while</span> !g.<span class="hl-title function_ invoke__">done</span>() {</span>
+<span class="line">    <span class="hl-comment">// Generate an arbitrary sorted array of length at most M.</span></span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">xs</span> =</span>
+<span class="line">      (<span class="hl-number">0</span>..g.<span class="hl-title function_ invoke__">gen</span>(N)).<span class="hl-title function_ invoke__">map</span>(|_| g.<span class="hl-title function_ invoke__">gen</span>(M) <span class="hl-keyword">as</span> <span class="hl-type">i32</span>).collect::&lt;<span class="hl-type">Vec</span>&lt;_&gt;&gt;();</span>
+<span class="line">    xs.<span class="hl-title function_ invoke__">sort</span>();</span>
+<span class="line"></span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-variable">x</span> = g.<span class="hl-title function_ invoke__">gen</span>(M) <span class="hl-keyword">as</span> <span class="hl-type">i32</span>;</span>
+<span class="line"></span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-variable">i</span> = <span class="hl-title function_ invoke__">insertion_point</span>(&amp;xs, x);</span>
+<span class="line">    <span class="hl-keyword">if</span> i &gt; <span class="hl-number">0</span>        { <span class="hl-built_in">assert!</span>(xs[i - <span class="hl-number">1</span>] &lt; x) }</span>
+<span class="line">    <span class="hl-keyword">if</span> i &lt; xs.<span class="hl-title function_ invoke__">len</span>() { <span class="hl-built_in">assert!</span>(x &lt;= xs[i]) }</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Here</span>&rsquo;<span>s how I would naively write this function. First, I start with defining the boundaries for the</span>
+<span>binary search:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">insertion_point</span>(xs: &amp;[<span class="hl-type">i32</span>], x: <span class="hl-type">i32</span>) <span class="hl-punctuation">-&gt;</span> <span class="hl-type">usize</span> {</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">lo</span> = <span class="hl-number">0</span>;</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">hi</span> = xs.<span class="hl-title function_ invoke__">len</span>();</span>
+<span class="line">    ...</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Then, repeatedly cut the interval in half until it vanishes</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">    <span class="hl-keyword">while</span> hi &gt; lo {</span>
+<span class="line">        <span class="hl-keyword">let</span> <span class="hl-variable">mid</span> = lo + (hi - lo) / <span class="hl-number">2</span>;</span>
+<span class="line">        ...</span>
+<span class="line">    }</span></code></pre>
+
+</figure>
+<p><span>and recur into the left or the right half accordingly:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">        <span class="hl-keyword">if</span> x &lt; xs[mid] {</span>
+<span class="line">            lo = mid;</span>
+<span class="line">        } <span class="hl-keyword">else</span> {</span>
+<span class="line">            hi = mid;</span>
+<span class="line">        }</span></code></pre>
+
+</figure>
+<p><span>Altogether:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">insertion_point</span>(xs: &amp;[<span class="hl-type">i32</span>], x: <span class="hl-type">i32</span>) <span class="hl-punctuation">-&gt;</span> <span class="hl-type">usize</span> {</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">lo</span> = <span class="hl-number">0</span>;</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-keyword">mut </span><span class="hl-variable">hi</span> = xs.<span class="hl-title function_ invoke__">len</span>();</span>
+<span class="line"></span>
+<span class="line">  <span class="hl-keyword">while</span> lo &lt; hi {</span>
+<span class="line">    <span class="hl-keyword">let</span> <span class="hl-variable">mid</span> = lo + (hi - lo) / <span class="hl-number">2</span>;</span>
+<span class="line">    <span class="hl-keyword">if</span> x &lt; xs[mid] {</span>
+<span class="line">      hi = mid;</span>
+<span class="line">    } <span class="hl-keyword">else</span> {</span>
+<span class="line">      lo = mid;</span>
+<span class="line">    }</span>
+<span class="line">  }</span>
+<span class="line"></span>
+<span class="line">  lo</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>I love this code! It has so many details right!</span></p>
+<ul>
+<li>
+<span>The </span><code>insertion_point</code><span> interface compactly compresses usually messy result of a binary search to</span>
+<span>just one index.</span>
+</li>
+<li>
+<code>xs / x</code><span> pair of names for the sequence and its element crisply describes abstract algorithm on</span>
+<span>sequencies.</span>
+</li>
+<li>
+<span>Similarly, </span><code>lo / hi</code><span> name pair is symmetric, expressing the relation between the two indexes.</span>
+</li>
+<li>
+<span>Half-open intervals are used for indexing.</span>
+</li>
+<li>
+<span>There are no special casing anywhere, the natural </span><code>lo &lt; hi</code><span> condition handles empty slice.</span>
+</li>
+<li>
+<span>We even dodge Java</span>&rsquo;<span>s binary search bug by computing midpoint without overflow.</span>
+</li>
+</ul>
+<p><span>There</span>&rsquo;<span>s only one problem with this code </span>&mdash;<span> it doesn</span>&rsquo;<span>t work. Just blindly following rules-of-thumb</span>
+<span>gives you working code surprisingly often, but this particular algorithm is an exception.</span></p>
+<p><span>The question is, how do we fix this overwise great code? And here</span>&rsquo;<span>s where thinking invariants helps.</span>
+<span>Before I internalized invariants, my approach would be to find a failing example, and to fumble with</span>
+<span>some plus or minus ones here and there and other special casing to make it work. That is, find a</span>
+<span>concrete problem, solve it. This works, but is slow, and doesn</span>&rsquo;<span>t allow discovering the problem</span>
+<span>before running the code.</span></p>
+<p><span>The alternative is to actually make an effort and spell out, explicitly, what the code is supposed</span>
+<span>to do. In this case, we want </span><code>lo</code><span> and </span><code>hi</code><span> to bound the result. That is,</span>
+<code class="display">lo &lt;= insertion_point &lt;= hi</code>
+<span>should hold on every iteration. It clearly holds before we enter the loop. On each iteration, we</span>
+<span>would like to shorten this interval, cutting away the part that definitely does not contain</span>
+<span>insertion point.</span></p>
+<p><span>Elaborating the invariant, all elements to the left of </span><code>lo</code><span> should be less than the target.</span>
+<span>Conversely, all elements to the right of </span><code>hi</code><span> should be at least as large as the target.</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">for</span> <span class="hl-variable">i</span> <span class="hl-keyword">in</span> <span class="hl-number">0</span>..lo: xs[i] &lt; x</span>
+<span class="line"><span class="hl-keyword">for</span> <span class="hl-variable">i</span> <span class="hl-keyword">in</span> hi..:  x &lt;= xs[i]</span></code></pre>
+
+</figure>
+<p><span>Let</span>&rsquo;<span>s now take a second look at the branching condition:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">x &lt; xs[mid]</span></code></pre>
+
+</figure>
+<p><span>It matches neither invariant prong exactly: </span><code>x</code><span> is on the left, but inequality is strict. We can</span>
+<span>rearrange the code to follow the invariant more closely:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">if</span> xs[mid] &lt; x {</span>
+<span class="line">    lo = mid + <span class="hl-number">1</span>;</span>
+<span class="line">} <span class="hl-keyword">else</span> {</span>
+<span class="line">    hi = mid;</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<ul>
+<li>
+<span>we flip the condition and if-branches, so that </span><code>xs[mid] &lt; x</code><span> matches </span><code>xs[i] &lt; x</code><span> from the</span>
+<span>invariant for </span><code>lo</code>
+</li>
+<li>
+<span>to make the invariant tight, we add </span><code>mid + 1</code><span> (if </span><code>xs[mid]</code><span> is less than </span><code>x</code><span>, we know that the</span>
+<span>insertion point is at least </span><code>mid + 1</code><span>)</span>
+</li>
+</ul>
+<p><span>The code now works. So what went wrong with the original version with </span><code>x &lt; xs[mid]</code><span>? In the else</span>
+<span>case, when </span><code>x &gt;= xs[mid]</code><span> we set </span><code>lo = mid</code><span>, but that</span>&rsquo;<span>s wrong! It might be the case that </span><code>x ==
+xs[mid]</code><span> and </span><code>x == xs[mid - 1]</code><span>, which would break the invariant for </span><code>lo</code><span>.</span></p>
+<p><span>The point isn</span>&rsquo;<span>t in this </span><em><span>particular</span></em><span> invariant or this particular algorithm. It</span>&rsquo;<span>s the general</span>
+<span>pattern that  it</span>&rsquo;<span>s easy to write the code which implements the right algorithm, and sort-of works,</span>
+<span>but is wrong in details. To get the details right for the right reason, you need to understand</span>
+<em><span>precisely</span></em><span> what the result should be, and formulating this as a (loop or recursion) invariant</span>
+<span>helps.</span></p>
+<hr>
+<p><span>Perhaps it</span>&rsquo;<span>s time to answer the title question: invariant is some property which holds at all times</span>
+<span>during dynamic evolution of the system. In the above example, the evolution is the program</span>
+<span>progressing through subsequent loop iterations. The invariant, the condition binding </span><code>lo</code><span> and </span><code>hi</code><span>,</span>
+<span>holds on every iteration. Invariants are powerful, because they are </span><em><span>compressed</span></em><span> descriptions of</span>
+<span>the system, they collapse away the time dimension, which is a huge simplification. Reasoning about</span>
+<span>each particular path the program could take is hard, because there are so many different paths.</span>
+<span>Reasoning about invariants is easy, because they capture properties shared by </span><em><span>all</span></em><span> execution paths.</span></p>
+<p><span>The same idea applies when programming in the large. In the small, we looked at how the state of a</span>
+<span>running program evolves over time. In the large, we will look at how the source code of the program</span>
+<span>itself evolves, as it is being refactored and extended to support new features. Here are some</span>
+<span>systems invariants from the systems I</span>&rsquo;<span>ve worked with:</span></p>
+<p><strong><span>Cargo:</span></strong></p>
+<p><span>File system paths entered by users are preserved exactly. If the user types</span>
+<span class="display"><code>cargo frob ../some/dir</code><span>,</span></span>
+<span>Cargo doesn</span>&rsquo;<span>t attempt to resolve </span><code>../some/dir</code><span> to an absolute path and passes the path</span>
+<span>to the underlying OS as is. The reason for that is that file systems are very finicky. Although it</span>
+<span>might look as if two paths are equivalent, there are bound to be cases where they are not. If the</span>
+<span>user typed a particular form of a path, they believe that it</span>&rsquo;<span>ll work, and any changes can mess</span>
+<span>things up easily.</span></p>
+<p><span>This is a relatively compact invariant </span>&mdash;<span> basically, code is just forbidden from calling</span>
+<code>fs::canonicalize</code><span>.</span></p>
+<p><strong><span>rust-analyzer:</span></strong></p>
+<p><span>Syntax trees are identity-less value types. That is, if you take an object representing an </span><code>if</code>
+<span>expression, that object doesn</span>&rsquo;<span>t have any knowledge of where in the larger program the </span><code>if</code>
+<span>expression is. The thinking about this invariant was that it simplifies refactors </span>&mdash;<span> while in the</span>
+<span>static program it</span>&rsquo;<span>s natural to talk about </span>&ldquo;<code>if</code><span> on the line X in file Y</span>&rdquo;<span>, when you start modifying</span>
+<span>code, identity becomes much more fluid.</span></p>
+<p><span>This is an invariant with far reaching consequences </span>&mdash;<span> that means that literally everything in</span>
+<span>rust-analyzer needs to track identities of things explicitly. You don</span>&rsquo;<span>t just pass around syntax</span>
+<span>nodes, you pass nodes with extra breadcrumbs describing their origin. I think this might have been a</span>
+<span>mistake </span>&mdash;<span> while it does make refactoring APIs more principled, refactoring is not the common case!</span>
+<span>Most of the work of a language server consists of read-only analysis of existing code, and the</span>
+<span>actual refactor is just a cherry on top. So perhaps it</span>&rsquo;<span>s better to try to bind identity mode tightly</span>
+<span>into the core data structure, and just use fake identities for temporary trees that arise during</span>
+<span>refactors.</span></p>
+<p><span>A more successful invariant from rust-analyzer is that the IDE has a full, frozen view of a snapshot</span>
+<span>of the world. There</span>&rsquo;<span>s no API for inferring the types, rather, the API looks as if all the types are</span>
+<span>computed at all times. Similarly, there</span>&rsquo;<span>s no explicit API for changing the code or talking about</span>
+<span>different historical versions of the code </span>&mdash;<span> the IDE sees a single </span>&ldquo;<span>current</span>&rdquo;<span> snapshot with all</span>
+<span>derived data computed. Underneath, there</span>&rsquo;<span>s a smart system to secretly compute the information on</span>
+<span>demand and re-use previous results, but this is all hidden from the API.</span></p>
+<p><span>This is a great, simple mental model, and it provides for a nice boundary between the compiler</span>
+<span>proper and IDE fluff like refactors and code completion. Long term, I</span>&rsquo;<span>d love to see several</span>
+<span>implementations of the </span>&ldquo;<span>compiler parts</span>&rdquo;<span>.</span></p>
+<p><strong><span>TigerBeetle:</span></strong></p>
+<p><span>A </span><em><span>lot</span></em><span> of thoughtful invariants here! To touch only a few:</span></p>
+<p><span>TigerBeetle doesn</span>&rsquo;<span>t allocate memory after startup. This simple invariant affects every bit of code</span>
+&mdash;<span> whatever you do, you must manage with existing, pre-allocated data structures. You can</span>&rsquo;<span>t just</span>
+<code>memcpy</code><span> stuff around, there</span>&rsquo;<span>s no ambient available space to </span><code>memcpy</code><span> to! As a consequence (and,</span>
+<span>historically, as a motivation for the design)</span>
+<a href="https://github.com/tigerbeetle/tigerbeetle/blob/cfb46eff4e001bb6b33f5e48924a2de44db20e8f/src/constants.zig#L417-L418"><span>everything</span></a>
+<span>has a specific numeric limit.</span></p>
+<p><span>Another fun one is that transaction logic can</span>&rsquo;<span>t read from disk. Every object which could be touched</span>
+<span>by a transaction needs to be explicitly prefetched into memory before transaction begins. Because</span>
+<span>disk IO happens separately from the execution, it is possible to parallelize IO for a whole batch of</span>
+<span>transactions. The actual transaction execution is then a very tight serial CPU loop without any</span>
+<span>locks.</span></p>
+<p><span>Speaking of disk IO, in TigerBeetle </span>&ldquo;<span>reading from disk</span>&rdquo;<span> can</span>&rsquo;<span>t fail. The central API for reading</span>
+<span>takes a data block address, a checksum, and invokes the callback with data with a matching checksum.</span>
+<span>Everything built on top doesn</span>&rsquo;<span>t need to worry about error handling. The way this works internally is</span>
+<span>that reads that fail on a local disk are repaired through other replicas in the cluster. It</span>&rsquo;<span>s just</span>
+<span>that the repair happens transparently to the caller. If the block of data of interest isn</span>&rsquo;<span>t found on</span>
+<span>the set of reachable replicas, the cluster correctly gets stuck until it is found.</span></p>
+<hr>
+<p><span>Summing up: invariants are helpful for describing systems that evolve over time. There</span>&rsquo;<span>s a</span>
+<span>combinatorial explosion of trajectories that a system </span><em><span>could</span></em><span> take. Invariants compactly describe</span>
+<span>properties shared by an infinite amount of trajectories.</span></p>
+<p><span>In the small, formulating invariants about program state helps to wire correct code.</span></p>
+<p><span>In the large, formulating invariants about the code itself helps to go from a small, simple system</span>
+<span>that works to a large system which is used in production.</span></p>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">Comparative Analysis</title>
+<link href="https://matklad.github.io/2023/09/13/comparative-analysis.html" rel="alternate" type="text/html" title="Comparative Analysis" />
+<published>2023-09-13T00:00:00+00:00</published>
+<updated>2023-09-13T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/09/13/comparative-analysis</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[Most languages provide 6 comparison operators:]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/09/13/comparative-analysis.html"><![CDATA[
+    <h1>
+    <a href="#Comparative-Analysis"><span>Comparative Analysis</span> <time datetime="2023-09-13">Sep 13, 2023</time></a>
+    </h1>
+<p><span>Most languages provide 6 comparison operators:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">&lt;</span>
+<span class="line">&lt;=</span>
+<span class="line">&gt;</span>
+<span class="line">&gt;=</span>
+<span class="line">=</span>
+<span class="line">!=</span></code></pre>
+
+</figure>
+<p><span>That</span>&rsquo;<span>s too damn many of them! Some time ago I</span>&rsquo;<span>ve noticed that my code involving comparisons is often</span>
+<span>hard to understand, and hides bugs. I</span>&rsquo;<span>ve figured some rules of thumb to reduce complexity, which I</span>
+<span>want to share.</span></p>
+<p><span>The core idea is to canonicalize things. Both </span><code>x &lt; y</code><span> and </span><code>y &gt; x</code><span> mean the same, and, if you use</span>
+<span>them with roughly equal frequency, you need to spend extra mental capacity to fold the two versions</span>
+<span>into the single </span>&ldquo;<span>x tiny, y HUGE</span>&rdquo;<span> concept in your head.</span></p>
+<p><span>The </span><a href="https://en.wikipedia.org/wiki/Number_line"><span>number line</span></a><span> is a great intuition and visualization</span>
+<span>for comparisons. If you order things from small to big,</span>
+<span class="display"><code>A B C D</code><span>,</span></span>
+<span>you get intuitive concept of ordering without using comparison operators. You also plug into your</span>
+<span>existing intuition that the sort function arranges arrays in the ascending order.</span></p>
+<p><span>So, as a first order rule-of-thumb:</span>
+<span class="display"><strong><span>Strongly prefer </span><code>&lt;</code><span> and </span><code>&lt;=</code><span> over </span><code>&gt;</code><span> and </span><code>&gt;=</code></strong></span>
+<span>And, when using comparisons, use number line intuition.</span></p>
+<p><span>Some snippets:</span></p>
+<p><span>Checking if a point is inside the interval:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">lo &lt;= x <span class="hl-keyword">and</span> x &lt;= hi</span></code></pre>
+
+</figure>
+<p><span>Checking if a point is outside of the interval:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">x &lt; lo <span class="hl-keyword">or</span> hi &lt; x</span></code></pre>
+
+</figure>
+<p><span>Segment </span><code>a</code><span> is inside segment </span><code>b</code><span>:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">b.start &lt;= a.start <span class="hl-keyword">and</span> a.end &lt;= b.end</span></code></pre>
+
+</figure>
+<p><span>Segments </span><code>a</code><span> and </span><code>b</code><span> are disjoint (either </span><code>a</code><span> is to the left of </span><code>b</code><span> or </span><code>a</code><span> is to the right of </span><code>b</code><span>):</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">a.end &lt; b.start <span class="hl-keyword">or</span> b.end &lt; a.start</span></code></pre>
+
+</figure>
+<p><span>A particular common case for ordered comparisons is checking that an index is in bounds for an</span>
+<span>array. Here, the rule about number line works together with another important rule: </span><span class="display"><strong><span>State</span>
+<span>invariants positively</span></strong></span></p>
+<p><span>The indexing invariant is spelled as </span><span class="display"><code>index &lt; xs.len()</code><span>,</span></span></p>
+<p><span>and you should prefer to see it exactly that way in the source code. Concretely,</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">if</span> (index &gt;= xs.len) {</span>
+<span class="line"></span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>is hard to get right, because is spells the converse of the invariant, and involves an extra mental</span>
+<span>negation (this is subtle </span>&mdash;<span> although there isn</span>&rsquo;<span>t a literal negation operator, you absolutely do</span>
+<span>think about this as a negation of the invariant). If possible, the code should be reshaped to</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">if</span> (index &lt; xs.len) {</span>
+<span class="line"></span>
+<span class="line">} <span class="hl-keyword">else</span> {</span>
+<span class="line"></span>
+<span class="line">}</span></code></pre>
+
+</figure>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">TypeScript is Surprisingly OK for Compilers</title>
+<link href="https://matklad.github.io/2023/08/17/typescript-is-surprisingly-ok-for-compilers.html" rel="alternate" type="text/html" title="TypeScript is Surprisingly OK for Compilers" />
+<published>2023-08-17T00:00:00+00:00</published>
+<updated>2023-08-17T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/08/17/typescript-is-surprisingly-ok-for-compilers</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[There are two main historical trends when choosing an implementation language for something
+compiler-shaped.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/08/17/typescript-is-surprisingly-ok-for-compilers.html"><![CDATA[
+    <h1>
+    <a href="#TypeScript-is-Surprisingly-OK-for-Compilers"><span>TypeScript is Surprisingly OK for Compilers</span> <time datetime="2023-08-17">Aug 17, 2023</time></a>
+    </h1>
+<p><span>There are two main historical trends when choosing an implementation language for something</span>
+<span>compiler-shaped.</span></p>
+<p><span>For more language-centric tasks, like a formal specification, or a toy hobby language, OCaml makes</span>
+<span>most sense. See, for example, </span><a href="https://plzoo.andrej.com"><span>plzoo</span></a><span> or </span><a href="https://github.com/WebAssembly/spec/tree/653938a88c6f40eb886d5980ca315136eb861d03/interpreter"><span>WebAssembly reference</span>
+<span>interpreter</span></a><span>.</span></p>
+<p><span>For something implementation-centric and production ready, C++ is often chosen: LLVM, clang, v8,</span>
+<span>HotSpot are all C++.</span></p>
+<p><span>These days, Rust is a great new addition to the landscape. It is influenced most directly by ML and</span>
+<span>C++, combines their strengths, and even brings something new of its own to the table, like seamless,</span>
+<span>safe multithreading. Still, Rust leans heavily towards production readiness side of the spectrum.</span>
+<span>While some aspects of it, like a </span>&ldquo;<span>just works</span>&rdquo;<span> build system, help with prototyping as well, there</span>&rsquo;<span>s</span>
+<span>still extra complexity tax due to the necessity to model physical layout of data. The usual advice,</span>
+<span>when you start building a compiler in Rust, is to avoid pointers and use indexes. Indexes are great!</span>
+<span>In large codebase, they allow greater decoupling (side tables can stay local to relevant modules),</span>
+<span>improved performance (an index is  </span><code>u32</code><span> and nudges you towards struct-of-arrays layouts), and more</span>
+<span>flexible computation strategies (indexes are easier to serialize or plug into incremental</span>
+<span>compilation framework). But they do make programming-in-the-small significantly more annoying, which</span>
+<span>is a deal-breaker for hobbyist tinkering.</span></p>
+<p><span>But OCaml is crufty! Is there something better? Today, I realized that TypeScript might actually be</span>
+<span>OK? It is not really surprising, given how the language works, but it never occured to me to think</span>
+<span>about TypeScript as an ML equivalent before.</span></p>
+<p><span>So, let</span>&rsquo;<span>s write a tiny-tiny typechecker in TS!</span></p>
+<p><span>Of course, we start with </span><a href="https://deno.land"><span>deno</span></a><span>. See </span><a href="https://matklad.github.io/2023/02/12/a-love-letter-to-deno.html"><em><span>A Love Letter to</span>
+<span>Deno</span></em></a><span> for more details, but the</span>
+<span>TL;DR is that deno provides out-of-the-box experience for TypeScript. This is a pain point for</span>
+<span>OCaml, and something that Rust does better than either OCaml or C++. But deno does this better than</span>
+<span>Rust! It</span>&rsquo;<span>s just a single binary, it comes with linting and formatting, there</span>&rsquo;<span>s no compilation step,</span>
+<span>and there are built-in task runner and watch mode. A dream setup for quick PLT hacks!</span></p>
+<p><span>And then there</span>&rsquo;<span>s TypeScript itself, with its sufficiently flexible, yet light-ceremony type system.</span></p>
+<p><span>Let</span>&rsquo;<span>s start with defining an AST. As we are hacking, we won</span>&rsquo;<span>t bother with making it an IDE-friendly</span>
+<span>concrete syntax tree, or incremental-friendly </span>&ldquo;<span>only store relative offsets</span>&rdquo;<span> tree, and will just tag</span>
+<span>AST nodes with locations in file:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">interface</span> <span class="hl-title class_">Location</span> {</span>
+<span class="line">  <span class="hl-attr">file</span>: <span class="hl-built_in">string</span>;</span>
+<span class="line">  <span class="hl-attr">line</span>: <span class="hl-built_in">number</span>;</span>
+<span class="line">  <span class="hl-attr">column</span>: <span class="hl-built_in">number</span>;</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Even here, we already see high-level nature of TypeScript </span>&mdash;<span> string is just a </span><code>string</code><span>, there</span>&rsquo;<span>s no</span>
+<span>thinking about </span><code>usize</code><span> vs </span><code>u32</code><span> as numbers are just </span><code>number</code><span>s.</span></p>
+<p><span>Usually, an expression is defined as a sum-type. As we want to tag each expression with a location,</span>
+<span>that representation would be slightly inconvenient for us, so we split things up a bit:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">interface</span> <span class="hl-title class_">Expr</span> {</span>
+<span class="line">    <span class="hl-attr">location</span>: <span class="hl-title class_">Location</span>;</span>
+<span class="line">    <span class="hl-attr">kind</span>: <span class="hl-title class_">ExprKind</span>;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">type</span> <span class="hl-title class_">ExprKind</span> = <span class="hl-title class_">ExprBool</span> | <span class="hl-title class_">ExprInt</span> | ... ;</span></code></pre>
+
+</figure>
+<p><span>One more thing </span>&mdash;<span> as we are going for something quick, we</span>&rsquo;<span>ll be storing inferred types directly in</span>
+<span>the AST nodes. Still, we want to keep raw and type-checked AST separate, so what we are going to do</span>
+<span>here is to parametrize the </span><code>Expr</code><span> over associated data it stores. A freshly parsed expression would</span>
+<span>use </span><code>void</code><span> as data, and the type checker will set it to </span><code>Type</code><span>. Here</span>&rsquo;<span>s what we get:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">interface</span> <span class="hl-title class_">Expr</span>&lt;T&gt; {</span>
+<span class="line">  <span class="hl-attr">location</span>: <span class="hl-title class_">Location</span>;</span>
+<span class="line">  <span class="hl-attr">data</span>: T;</span>
+<span class="line">  <span class="hl-attr">kind</span>: <span class="hl-title class_">ExprKind</span>&lt;T&gt;;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">type</span> <span class="hl-title class_">ExprKind</span>&lt;T&gt; =</span>
+<span class="line">  | <span class="hl-title class_">ExprBool</span>&lt;T&gt;</span>
+<span class="line">  | <span class="hl-title class_">ExprInt</span>&lt;T&gt;</span>
+<span class="line">  | <span class="hl-title class_">ExprBinary</span>&lt;T&gt;</span>
+<span class="line">  | <span class="hl-title class_">ExprControl</span>&lt;T&gt;;</span></code></pre>
+
+</figure>
+<p><span>A definition of </span><code>ExprBinary</code><span> could look like this:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">interface</span> <span class="hl-title class_">ExprBinary</span>&lt;T&gt; {</span>
+<span class="line">  <span class="hl-attr">op</span>: <span class="hl-title class_">BinaryOp</span>;</span>
+<span class="line">  <span class="hl-attr">lhs</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;;</span>
+<span class="line">  <span class="hl-attr">rhs</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">enum</span> <span class="hl-title class_">BinaryOp</span> {</span>
+<span class="line">  <span class="hl-title class_">Add</span>, <span class="hl-title class_">Sub</span>, <span class="hl-title class_">Mul</span>, <span class="hl-title class_">Div</span>,</span>
+<span class="line">  <span class="hl-title class_">Eq</span>, <span class="hl-title class_">Neq</span>,</span>
+<span class="line">  <span class="hl-title class_">Lt</span>, <span class="hl-title class_">Gt</span>, <span class="hl-title class_">Le</span>, <span class="hl-title class_">Ge</span>,</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Note how I don</span>&rsquo;<span>t introduce separate types for, e.g, </span><code>AddExpr</code><span> and </span><code>SubExpr</code><span> </span>&mdash;<span> all binary</span>
+<span>expressions have the same shape, so one type is enough!</span></p>
+<p><span>But we need a tiny adjustment here. Our </span><code>Expr</code><span> kind is defined as a union type. To match a value of</span>
+<span>a union type a bit of runtime type information is needed. However, it</span>&rsquo;<span>s one of the core properties</span>
+<span>of TypeScript that it doesn</span>&rsquo;<span>t add any runtime behaviors. So, if we want to match on expression kinds</span>
+<span>(and we for sure want!), we need to give a helping hand to the compiler and include a bit of RTTI</span>
+<span>manually. That would be the </span><code>tag</code><span> field:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">interface</span> <span class="hl-title class_">ExprBinary</span>&lt;T&gt; {</span>
+<span class="line hl-line">  <span class="hl-attr">tag</span>: <span class="hl-string">&quot;binary&quot;</span>;</span>
+<span class="line">  <span class="hl-attr">op</span>: <span class="hl-title class_">BinaryOp</span>;</span>
+<span class="line">  <span class="hl-attr">lhs</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;;</span>
+<span class="line">  <span class="hl-attr">rhs</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;;</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><code>tag: "binary"</code><span> means that the only possible runtime value for </span><code>tag</code><span> is the string </span><code>"binary"</code><span>.</span></p>
+<p><span>Similarly to various binary expressions, boolean literal and int literal expressions have </span><em><span>almost</span></em>
+<span>identical shape.  Almost, because the payload (</span><code>boolean</code><span> or </span><code>number</code><span>) is different. TypeScript</span>
+<span>allows us to neatly abstract this over:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">type</span> <span class="hl-title class_">ExprBool</span>&lt;T&gt; = <span class="hl-title class_">ExprLiteral</span>&lt;T, <span class="hl-built_in">boolean</span>, <span class="hl-string">&quot;bool&quot;</span>&gt;;</span>
+<span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">type</span> <span class="hl-title class_">ExprInt</span>&lt;T&gt; = <span class="hl-title class_">ExprLiteral</span>&lt;T, <span class="hl-built_in">number</span>, <span class="hl-string">&quot;int&quot;</span>&gt;;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">interface</span> <span class="hl-title class_">ExprLiteral</span>&lt;T, V, <span class="hl-title class_">Tag</span>&gt; {</span>
+<span class="line">  <span class="hl-attr">tag</span>: <span class="hl-title class_">Tag</span>;</span>
+<span class="line">  <span class="hl-attr">value</span>: V;</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Finally, for control-flow expressions we only add </span><code>if</code><span> for now:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">type</span> <span class="hl-title class_">ExprControl</span>&lt;T&gt; = <span class="hl-title class_">ExprIf</span>&lt;T&gt;;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">interface</span> <span class="hl-title class_">ExprIf</span>&lt;T&gt; {</span>
+<span class="line">  <span class="hl-attr">tag</span>: <span class="hl-string">&quot;if&quot;</span>;</span>
+<span class="line">  <span class="hl-attr">cond</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;;</span>
+<span class="line">  <span class="hl-attr">then_branch</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;;</span>
+<span class="line">  <span class="hl-attr">else_branch</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;;</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>This concludes the definition of the ast! Let</span>&rsquo;<span>s move on to the type inference! Start with types:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">type</span> <span class="hl-title class_">Type</span> = <span class="hl-title class_">TypeBool</span> | <span class="hl-title class_">TypeInt</span>;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">interface</span> <span class="hl-title class_">TypeBool</span> {</span>
+<span class="line">  <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Bool&quot;</span>;</span>
+<span class="line">}</span>
+<span class="line"><span class="hl-keyword">const</span> <span class="hl-title class_">TypeBool</span>: <span class="hl-title class_">TypeBool</span> = { <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Bool&quot;</span> };</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">interface</span> <span class="hl-title class_">TypeInt</span> {</span>
+<span class="line">  <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Int&quot;</span>;</span>
+<span class="line">}</span>
+<span class="line"><span class="hl-keyword">const</span> <span class="hl-title class_">TypeInt</span>: <span class="hl-title class_">TypeInt</span> = { <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Int&quot;</span> };</span></code></pre>
+
+</figure>
+<p><span>Our types are really simple, we could have gone with </span><span class="display"><code>type Type = "Int" | "Bool"</code><span>,</span></span><span> but</span>
+<span>lets do this a bit more enterprisy! We define separate types for integer and boolean types. As these</span>
+<span>types are singletons, we also provide canonical definitions. And here is another TypeScript-ism.</span>
+<span>Because TypeScript fully erases types, everything related to types lives in a separate namespace. So</span>
+<span>you can have a type and a value sharing the same name. Which is exactly what we use to define the</span>
+<span>singletons!</span></p>
+<p><span>Finally, we can take advantage of our associated-data parametrized expression and write the</span>
+<span>signature of</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">infer_types</span>(<span class="hl-params">expr: ast.Expr&lt;<span class="hl-built_in">void</span>&gt;</span>): ast.<span class="hl-property">Expr</span>&lt;<span class="hl-title class_">Type</span>&gt;</span></code></pre>
+
+</figure>
+<p><span>As it says on the tin, </span><code>inter_types</code><span> fills in </span><code>Type</code><span> information into the void! Let</span>&rsquo;<span>s fill in the</span>
+<span>details!</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">infer_types</span>(<span class="hl-params">expr: ast.Expr&lt;<span class="hl-built_in">void</span>&gt;</span>): ast.<span class="hl-property">Expr</span>&lt;<span class="hl-title class_">Type</span>&gt; {</span>
+<span class="line">  <span class="hl-keyword">switch</span> (expr.<span class="hl-property">kind</span>.<span class="hl-property">tag</span>) {</span>
+<span class="line">    cas</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>If at this point we hit Enter, the editor completes:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">infer_types</span>(<span class="hl-params">expr: ast.Expr&lt;<span class="hl-built_in">void</span>&gt;</span>): ast.<span class="hl-property">Expr</span>&lt;<span class="hl-title class_">Type</span>&gt; {</span>
+<span class="line">  <span class="hl-keyword">switch</span> (expr.<span class="hl-property">kind</span>.<span class="hl-property">tag</span>) {</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;bool&quot;</span>:</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;int&quot;</span>:</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;binary&quot;</span>:</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;if&quot;</span>:</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>There</span>&rsquo;<span>s one problem though. What we really want to write here is something like</span>
+<span class="display"><code>const inferred_type = switch(..)</code><span>,</span></span>
+<span>but in TypeScript </span><code>switch</code><span> is a statement, not an expression.</span>
+<span>So let</span>&rsquo;<span>s define a generic visitor!</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">type</span> <span class="hl-title class_">Visitor</span>&lt;T, R&gt; = {</span>
+<span class="line">  <span class="hl-title function_">bool</span>(<span class="hl-attr">kind</span>: <span class="hl-title class_">ExprBool</span>&lt;T&gt;): R;</span>
+<span class="line">  <span class="hl-title function_">int</span>(<span class="hl-attr">kind</span>: <span class="hl-title class_">ExprInt</span>&lt;T&gt;): R;</span>
+<span class="line">  <span class="hl-title function_">binary</span>(<span class="hl-attr">kind</span>: <span class="hl-title class_">ExprBinary</span>&lt;T&gt;): R;</span>
+<span class="line">  <span class="hl-keyword">if</span>(<span class="hl-attr">kind</span>: <span class="hl-title class_">ExprIf</span>&lt;T&gt;): R;</span>
+<span class="line">};</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">function</span> visit&lt;T, R&gt;(</span>
+<span class="line">  <span class="hl-attr">expr</span>: <span class="hl-title class_">Expr</span>&lt;T&gt;,</span>
+<span class="line">  <span class="hl-attr">v</span>: <span class="hl-title class_">Visitor</span>&lt;T, R&gt;,</span>
+<span class="line">): R {</span>
+<span class="line">  <span class="hl-keyword">switch</span> (expr.<span class="hl-property">kind</span>.<span class="hl-property">tag</span>) {</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;bool&quot;</span>: <span class="hl-keyword">return</span> v.<span class="hl-title function_">bool</span>(expr.<span class="hl-property">kind</span>);</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;int&quot;</span>: <span class="hl-keyword">return</span> v.<span class="hl-title function_">int</span>(expr.<span class="hl-property">kind</span>);</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;binary&quot;</span>: <span class="hl-keyword">return</span> v.<span class="hl-title function_">binary</span>(expr.<span class="hl-property">kind</span>);</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;if&quot;</span>: <span class="hl-keyword">return</span> v.<span class="hl-title function_">if</span>(expr.<span class="hl-property">kind</span>);</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Armed with the </span><code>visit</code><span>, we can ergonomically match over the expression:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">infer_types</span>(<span class="hl-params">expr: ast.Expr&lt;<span class="hl-built_in">void</span>&gt;</span>): ast.<span class="hl-property">Expr</span>&lt;<span class="hl-title class_">Type</span>&gt; {</span>
+<span class="line">  <span class="hl-keyword">const</span> ty = <span class="hl-title function_">visit</span>(expr, {</span>
+<span class="line">    <span class="hl-attr">bool</span>: <span class="hl-function">() =&gt;</span> <span class="hl-title class_">TypeBool</span>,</span>
+<span class="line">    <span class="hl-attr">int</span>: <span class="hl-function">() =&gt;</span> <span class="hl-title class_">TypeInt</span>,</span>
+<span class="line">    <span class="hl-attr">binary</span>: <span class="hl-function">(<span class="hl-params">kind: ast.ExprBinary&lt;<span class="hl-built_in">void</span>&gt;</span>) =&gt;</span> <span class="hl-title function_">result_type</span>(kind.<span class="hl-property">op</span>),</span>
+<span class="line">    <span class="hl-attr">if</span>: (<span class="hl-attr">kind</span>: ast.<span class="hl-property">ExprIf</span>&lt;<span class="hl-built_in">void</span>&gt;) {</span>
+<span class="line">      ...</span>
+<span class="line">    },</span>
+<span class="line">  });</span>
+<span class="line">  ...</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">result_type</span>(<span class="hl-params">op: ast.BinaryOp</span>): <span class="hl-title class_">Type</span> {</span>
+<span class="line">  <span class="hl-keyword">switch</span> (op) { <span class="hl-comment">// A tad verbose, but auto-completed!</span></span>
+<span class="line">    <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Add</span>: <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Sub</span>:</span>
+<span class="line">    <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Mul</span>: <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Div</span>:</span>
+<span class="line">      <span class="hl-keyword">return</span> <span class="hl-title class_">TypeInt</span></span>
+<span class="line"></span>
+<span class="line">    <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Eq</span>: <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Neq</span>:</span>
+<span class="line">      <span class="hl-keyword">return</span> <span class="hl-title class_">TypeBool</span></span>
+<span class="line"></span>
+<span class="line">    <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Lt</span>: <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Gt</span>:</span>
+<span class="line">    <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Le</span>: <span class="hl-keyword">case</span> ast.<span class="hl-property">BinaryOp</span>.<span class="hl-property">Ge</span>:</span>
+<span class="line">      <span class="hl-keyword">return</span> <span class="hl-title class_">TypeBool</span></span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Before we go further, let</span>&rsquo;<span>s generalize this visiting pattern a bit! Recall that our expressions are</span>
+<span>parametrized by the type of associated data, and type-checker-shaped transformations are essentially an</span>
+<code class="display">Expr&lt;U&gt; -&gt; Expr&lt;V&gt;</code>
+<span>transformation.</span></p>
+<p><span>Let</span>&rsquo;<span>s make this generic!</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">function</span> transform&lt;U, V&gt;(<span class="hl-attr">expr</span>: <span class="hl-title class_">Expr</span>&lt;U&gt;, <span class="hl-attr">v</span>: <span class="hl-title class_">Visitor</span>&lt;V, V&gt;): <span class="hl-title class_">Expr</span>&lt;V&gt; {</span></code></pre>
+
+</figure>
+<p><span>Transform maps an expression carrying </span><code>T</code><span> into an expression carrying </span><code>V</code><span> by applying an </span><code>f</code>
+<span>visitor. Importantly, it</span>&rsquo;<span>s </span><code>Visitor&lt;V, V&gt;</code><span>, rather than a </span><code>Visitor&lt;U, V&gt;</code><span>. This is</span>
+<span>counter-intuitive, but correct </span>&mdash;<span> we run transformation bottom up, transforming the leaves first.</span>
+<span>So, when the time comes to visit an interior node, all subexpression will have been transformed!</span></p>
+<p><span>The body of </span><code>transform</code><span> is wordy, but regular, rectangular, and auto-completes itself:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">export</span> <span class="hl-keyword">function</span> transform&lt;U, V&gt;(<span class="hl-attr">expr</span>: <span class="hl-title class_">Expr</span>&lt;U&gt;, <span class="hl-attr">v</span>: <span class="hl-title class_">Visitor</span>&lt;V, V&gt;): <span class="hl-title class_">Expr</span>&lt;V&gt; {</span>
+<span class="line">  <span class="hl-keyword">switch</span> (expr.<span class="hl-property">kind</span>.<span class="hl-property">tag</span>) {</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;bool&quot;</span>:</span>
+<span class="line">      <span class="hl-keyword">return</span> {</span>
+<span class="line">        <span class="hl-attr">location</span>: expr.<span class="hl-property">location</span>,</span>
+<span class="line">        <span class="hl-attr">data</span>: v.<span class="hl-title function_">bool</span>(expr.<span class="hl-property">kind</span>),</span>
+<span class="line">        <span class="hl-attr">kind</span>: expr.<span class="hl-property">kind</span>, <i class="callout" data-value="1"></i></span>
+<span class="line">      };</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;int&quot;</span>:</span>
+<span class="line">      <span class="hl-keyword">return</span> {</span>
+<span class="line">        <span class="hl-attr">location</span>: expr.<span class="hl-property">location</span>,</span>
+<span class="line">        <span class="hl-attr">data</span>: v.<span class="hl-title function_">int</span>(expr.<span class="hl-property">kind</span>),</span>
+<span class="line">        <span class="hl-attr">kind</span>: expr.<span class="hl-property">kind</span>,</span>
+<span class="line">      };</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;binary&quot;</span>: {</span>
+<span class="line">      <span class="hl-keyword">const</span> <span class="hl-attr">kind</span>: <span class="hl-title class_">ExprBinary</span>&lt;V&gt; = { <i class="callout" data-value="2"></i></span>
+<span class="line">        <span class="hl-attr">tag</span>: <span class="hl-string">&quot;binary&quot;</span>,</span>
+<span class="line">        <span class="hl-attr">op</span>: expr.<span class="hl-property">kind</span>.<span class="hl-property">op</span>,</span>
+<span class="line">        <span class="hl-attr">lhs</span>: <span class="hl-title function_">transform</span>(expr.<span class="hl-property">kind</span>.<span class="hl-property">lhs</span>, v),</span>
+<span class="line">        <span class="hl-attr">rhs</span>: <span class="hl-title function_">transform</span>(expr.<span class="hl-property">kind</span>.<span class="hl-property">rhs</span>, v),</span>
+<span class="line">      };</span>
+<span class="line">      <span class="hl-keyword">return</span> {</span>
+<span class="line">        <span class="hl-attr">location</span>: expr.<span class="hl-property">location</span>,</span>
+<span class="line">        <span class="hl-attr">data</span>: v.<span class="hl-title function_">binary</span>(kind), <i class="callout" data-value="2"></i></span>
+<span class="line">        <span class="hl-attr">kind</span>: kind,</span>
+<span class="line">      };</span>
+<span class="line">    }</span>
+<span class="line">    <span class="hl-keyword">case</span> <span class="hl-string">&quot;if&quot;</span>: {</span>
+<span class="line">      <span class="hl-keyword">const</span> <span class="hl-attr">kind</span>: <span class="hl-title class_">ExprIf</span>&lt;V&gt; = {</span>
+<span class="line">        <span class="hl-attr">tag</span>: <span class="hl-string">&quot;if&quot;</span>,</span>
+<span class="line">        <span class="hl-attr">cond</span>: <span class="hl-title function_">transform</span>(expr.<span class="hl-property">kind</span>.<span class="hl-property">cond</span>, v),</span>
+<span class="line">        <span class="hl-attr">then_branch</span>: <span class="hl-title function_">transform</span>(expr.<span class="hl-property">kind</span>.<span class="hl-property">then_branch</span>, v),</span>
+<span class="line">        <span class="hl-attr">else_branch</span>: <span class="hl-title function_">transform</span>(expr.<span class="hl-property">kind</span>.<span class="hl-property">else_branch</span>, v),</span>
+<span class="line">      };</span>
+<span class="line">      <span class="hl-keyword">return</span> {</span>
+<span class="line">        <span class="hl-attr">location</span>: expr.<span class="hl-property">location</span>,</span>
+<span class="line">        <span class="hl-attr">data</span>: v.<span class="hl-title function_">if</span>(kind),</span>
+<span class="line">        <span class="hl-attr">kind</span>: kind,</span>
+<span class="line">      };</span>
+<span class="line">    }</span>
+<span class="line">  }</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<ol class="callout">
+<li>
+<p><span>Note how here </span><code>expr.kind</code><span> is both </span><code>Expr&lt;U&gt;</code><span> and  </span><code>Expr&lt;V&gt;</code><span> </span>&mdash;<span> literals don</span>&rsquo;<span>t depend on this type</span>
+<span>parameter, and TypeScript is smart enough to figure this out without us manually re-assembling</span>
+<span>the same value with a different type.</span></p>
+</li>
+<li>
+<p><span>This is where that magic with </span><code>Visitor&lt;V, V&gt;</code><span> happens.</span></p>
+</li>
+</ol>
+<p><span>The code is pretty regular here though! So at this point we might actually recall that TypeScript is</span>
+<span>a dynamically-typed language, and write a generic traversal using </span><code>Object.keys</code><span>, </span><em><span>while keeping the</span>
+<span>static function signature in-place</span></em><span>. I don</span>&rsquo;<span>t think we need to do it here, but there</span>&rsquo;<span>s comfort in</span>
+<span>knowing that it</span>&rsquo;<span>s possible!</span></p>
+<p><em><span>Now</span></em><span> implementing type inference should be a breeze! We need some way to emit type errors though.</span>
+<span>With TypeScript, it would be trivial to accumulate errors into an array as a side-effect, but let</span>&rsquo;<span>s</span>
+<span>actually represent type errors as instances of a specific type, </span><code>TypeError</code><span> (pun intended):</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">type</span> <span class="hl-title class_">Type</span> = <span class="hl-title class_">TypeBool</span> | <span class="hl-title class_">TypeInt</span> | <span class="hl-title class_">TypeError</span>;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">interface</span> <span class="hl-title class_">TypeError</span> {</span>
+<span class="line">  <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Error&quot;</span>;</span>
+<span class="line">  <span class="hl-attr">location</span>: ast.<span class="hl-property">Location</span>;</span>
+<span class="line">  <span class="hl-attr">message</span>: <span class="hl-built_in">string</span>;</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>To check ifs and binary expressions, we would also need a utility for comparing types:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">type_equal</span>(<span class="hl-params">lhs: Type, rhs: Type</span>): <span class="hl-built_in">boolean</span> {</span>
+<span class="line">  <span class="hl-keyword">if</span> (lhs.<span class="hl-property">tag</span> == <span class="hl-string">&quot;Error&quot;</span> || rhs.<span class="hl-property">tag</span> == <span class="hl-string">&quot;Error&quot;</span>) <span class="hl-keyword">return</span> <span class="hl-literal">true</span>;</span>
+<span class="line">  <span class="hl-keyword">return</span> lhs.<span class="hl-property">tag</span> == rhs.<span class="hl-property">tag</span>;</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>We make the </span><code>Error</code><span> type equal to any other type to prevent cascading failures. With all that</span>
+<span>machinery in place, our type checker is finally:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">infer_types</span>(<span class="hl-params">expr: ast.Expr&lt;<span class="hl-built_in">void</span>&gt;</span>): ast.<span class="hl-property">Expr</span>&lt;<span class="hl-title class_">Type</span>&gt; {</span>
+<span class="line">  <span class="hl-keyword">return</span> ast.<span class="hl-title function_">transform</span>(expr, {</span>
+<span class="line">    <span class="hl-attr">bool</span>: (): <span class="hl-function"><span class="hl-params">Type</span> =&gt;</span> <span class="hl-title class_">TypeBool</span>,</span>
+<span class="line">    <span class="hl-attr">int</span>: (): <span class="hl-function"><span class="hl-params">Type</span> =&gt;</span> <span class="hl-title class_">TypeInt</span>,</span>
+<span class="line"></span>
+<span class="line">    <span class="hl-attr">binary</span>: (<span class="hl-attr">kind</span>: ast.<span class="hl-property">ExprBinary</span>&lt;<span class="hl-title class_">Type</span>&gt;, <span class="hl-attr">location</span>: ast.<span class="hl-property">Location</span>): <span class="hl-function"><span class="hl-params">Type</span> =&gt;</span> {</span>
+<span class="line">      <span class="hl-keyword">if</span> (!<span class="hl-title function_">type_equal</span>(kind.<span class="hl-property">lhs</span>.<span class="hl-property">data</span>, kind.<span class="hl-property">rhs</span>.<span class="hl-property">data</span>)) {</span>
+<span class="line">        <span class="hl-keyword">return</span> {</span>
+<span class="line">          <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Error&quot;</span>,</span>
+<span class="line">          location,</span>
+<span class="line">          <span class="hl-attr">message</span>: <span class="hl-string">&quot;binary expression operands have different types&quot;</span>,</span>
+<span class="line">        };</span>
+<span class="line">      }</span>
+<span class="line">      <span class="hl-keyword">return</span> <span class="hl-title function_">result_type</span>(kind.<span class="hl-property">op</span>);</span>
+<span class="line">    },</span>
+<span class="line"></span>
+<span class="line">    <span class="hl-attr">if</span>: (<span class="hl-attr">kind</span>: ast.<span class="hl-property">ExprIf</span>&lt;<span class="hl-title class_">Type</span>&gt;, <span class="hl-attr">location</span>: ast.<span class="hl-property">Location</span>): <span class="hl-function"><span class="hl-params">Type</span> =&gt;</span> {</span>
+<span class="line">      <span class="hl-keyword">if</span> (!<span class="hl-title function_">type_equal</span>(kind.<span class="hl-property">cond</span>.<span class="hl-property">data</span>, <span class="hl-title class_">TypeBool</span>)) {</span>
+<span class="line">        <span class="hl-keyword">return</span> {</span>
+<span class="line">          <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Error&quot;</span>,</span>
+<span class="line">          location,</span>
+<span class="line">          <span class="hl-attr">message</span>: <span class="hl-string">&quot;if condition is not a boolean&quot;</span>,</span>
+<span class="line">        };</span>
+<span class="line">      }</span>
+<span class="line">      <span class="hl-keyword">if</span> (!<span class="hl-title function_">type_equal</span>(kind.<span class="hl-property">then_branch</span>.<span class="hl-property">data</span>, kind.<span class="hl-property">else_branch</span>.<span class="hl-property">data</span>)) {</span>
+<span class="line">        <span class="hl-keyword">return</span> {</span>
+<span class="line">          <span class="hl-attr">tag</span>: <span class="hl-string">&quot;Error&quot;</span>,</span>
+<span class="line">          location,</span>
+<span class="line">          <span class="hl-attr">message</span>: <span class="hl-string">&quot;if branches have different types&quot;</span>,</span>
+<span class="line">        };</span>
+<span class="line">      }</span>
+<span class="line">      <span class="hl-keyword">return</span> kind.<span class="hl-property">then_branch</span>.<span class="hl-property">data</span>;</span>
+<span class="line">    },</span>
+<span class="line">  });</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">result_type</span>(<span class="hl-params">op: ast.BinaryOp</span>): <span class="hl-title class_">Type</span> {</span>
+<span class="line">    ...</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Astute reader will notice that our visitor functions now take an extra </span><code>ast.Location</code><span> argument.</span>
+<span>TypeScript allows using this argument only in cases where it is needed, cutting down verbosity.</span></p>
+<p><span>And that</span>&rsquo;<span>s all for today! The end result is pretty neat and concise. It took some typing to get there,</span>
+<span>but TypeScript autocompletion really helps with that! What</span>&rsquo;<span>s more important, there was very little</span>
+<span>fighting with the language, and the result feels quite natural and directly corresponds to the shape</span>
+<span>of the problem.</span></p>
+<p><span>I am not entirely sure in the conclusion just yet, but I think I</span>&rsquo;<span>ll be using TypeScript as my tool</span>
+<span>of choice for various small language hacks. It is surprisingly productive due to the confluence of</span>
+<span>three aspects:</span></p>
+<ul>
+<li>
+<span>deno is a perfect scripting runtime! Small, hermetic, powerful, and optimized for effective</span>
+<span>development workflows.</span>
+</li>
+<li>
+<span>TypeScript tooling is great </span>&mdash;<span> the IDE is helpful and productive (and deno makes sure that it</span>
+<span>also requires zero configuration)</span>
+</li>
+<li>
+<span>The language is powerful both at runtime and at compile time. You can get pretty fancy with types,</span>
+<span>but you can also just escape to dynamic world if you need some very high-order code.</span>
+</li>
+</ul>
+<hr>
+<p><span>Just kidding, here</span>&rsquo;<span>s one more cute thing. Let</span>&rsquo;<span>s say that we want to have lots of syntactic sugar,</span>
+<span>and also want type-safe desugaring. We could tweak our setup a bit for that: instead of </span><code>Expr</code><span> and</span>
+<code>ExprKind</code><span> being parametrized over associated data, we circularly parametrize </span><code>Expr</code><span> by the whole</span>
+<code>ExprKind</code><span> and  vice verse:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">interface</span> <span class="hl-title class_">Expr</span>&lt;K&gt; {</span>
+<span class="line">  <span class="hl-attr">location</span>: <span class="hl-title class_">Location</span>,</span>
+<span class="line">  <span class="hl-attr">kind</span>: K,</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">interface</span> <span class="hl-title class_">ExprBinary</span>&lt;E&gt; {</span>
+<span class="line">  <span class="hl-attr">op</span>: <span class="hl-title class_">BinaryOp</span>,</span>
+<span class="line">  <span class="hl-attr">lhs</span>: E,</span>
+<span class="line">  <span class="hl-attr">rhs</span>: E,</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>This allows expressing desugaring in a type-safe manner!</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-comment">// Fundamental, primitive expressions.</span></span>
+<span class="line"><span class="hl-keyword">type</span> <span class="hl-title class_">ExprKindCore</span>&lt;E&gt; =</span>
+<span class="line">    <span class="hl-title class_">ExprInt</span>&lt;E&gt; | <span class="hl-title class_">ExprBinary</span>&lt;E&gt; | <span class="hl-title class_">ExprIf</span>&lt;E&gt;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-comment">// Expressions which are either themselves primitive,</span></span>
+<span class="line"><span class="hl-comment">// or can be desugared to primitives.</span></span>
+<span class="line"><span class="hl-keyword">type</span> <span class="hl-title class_">ExprKindSugar</span>&lt;E&gt; = <span class="hl-title class_">ExprKindCore</span>&lt;E&gt;</span>
+<span class="line">    | <span class="hl-title class_">ExprCond</span>&lt;E&gt; | <span class="hl-title class_">ExprUnless</span>&lt;E&gt;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">type</span> <span class="hl-title class_">ExprCore</span> = <span class="hl-title class_">Expr</span>&lt;<span class="hl-title class_">ExprKindCore</span>&lt;<span class="hl-title class_">ExprCore</span>&gt;&gt;;</span>
+<span class="line"><span class="hl-keyword">type</span> <span class="hl-title class_">ExprSugar</span> = <span class="hl-title class_">Expr</span>&lt;<span class="hl-title class_">ExprKindSugar</span>&lt;<span class="hl-title class_">ExprSugar</span>&gt;&gt;;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-comment">// Desugaring works by reducing the set of expression kinds.</span></span>
+<span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">desugar</span>(<span class="hl-params">expr: ExprSugar</span>): <span class="hl-title class_">ExprCore</span></span>
+<span class="line"></span>
+<span class="line"><span class="hl-comment">// A desugaring steps takes a (potentially sugar) expression,</span></span>
+<span class="line"><span class="hl-comment">// whose subexpression are already desugared,</span></span>
+<span class="line"><span class="hl-comment">// and produces an equivalent core expression.</span></span>
+<span class="line"><span class="hl-keyword">function</span> <span class="hl-title function_">desugar_one</span>(<span class="hl-params"></span></span>
+<span class="line"><span class="hl-params">    expr: ExprKindSugar&lt;ExprCore&gt;,</span></span>
+<span class="line"><span class="hl-params"></span>): <span class="hl-title class_">ExprKindCore</span>&lt;<span class="hl-title class_">ExprCore</span>&gt;</span></code></pre>
+
+</figure>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">Role Of Algorithms</title>
+<link href="https://matklad.github.io/2023/08/13/role-of-algorithms.html" rel="alternate" type="text/html" title="Role Of Algorithms" />
+<published>2023-08-13T00:00:00+00:00</published>
+<updated>2023-08-13T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/08/13/role-of-algorithms</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[This is lobste.rs comment as an article, so expect even more abysmal editing than usual.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/08/13/role-of-algorithms.html"><![CDATA[
+    <h1>
+    <a href="#Role-Of-Algorithms"><span>Role Of Algorithms</span> <time datetime="2023-08-13">Aug 13, 2023</time></a>
+    </h1>
+<p><span>This is lobste.rs comment as an article, so expect even more abysmal editing than usual.</span></p>
+<p><span>Let me expand on something I mentioned in the</span>
+<a href="https://matklad.github.io/2023/08/06/fantastic-learning-resources.html" class="display url">https://matklad.github.io/2023/08/06/fantastic-learning-resources.html</a>
+<span>post:</span></p>
+<p>&ldquo;<span>Algorithms</span>&rdquo;<span> are a useful skill not because you use it at work every day, but because they train you</span>
+<span>to be better at particular aspects of software engineering.</span></p>
+<p><span>Specifically:</span></p>
+<p><em><span>First</span></em><span>, algorithms drill the skill of bug-free coding. Algorithms are hard and frustrating! Subtle</span>
+<span>off-by-one might not matter for simple tests, but breaks corner cases. But if you practice</span>
+<span>algorithms, you get better at this particular skill of writing correct small programs, and I think</span>
+<span>this probably generalizes.</span></p>
+<p><span>To give an array of analogies:</span></p>
+<ul>
+<li>
+<p><span>People do cardio or strength exercises not because they need to lift heavy weights in real life.</span>
+<span>Quite the opposite </span>&mdash;<span> there</span>&rsquo;<span>s </span><em><span>too little</span></em><span> physical exertion in our usual lives, so we need extra</span>
+<span>exercises for our bodies to gain generalized health (which </span><em><span>is</span></em><span> helpful in day-to-day life).</span></p>
+</li>
+<li>
+<p><span>You don</span>&rsquo;<span>t practice complex skill by mere repetition. You first break it down into atomic trainable</span>
+<span>sub skills, and drill each sub skill separately in unrealistic condition. Writing correct</span>
+<span>algorithmy code is a sub skill of software engineering.</span></p>
+</li>
+<li>
+<p><span>When you optimize system, you don</span>&rsquo;<span>t just repeatedly run end-to-end test until things go fast. You</span>
+<span>first identify the problematic area, then write a targeted micro benchmark to isolate this</span>
+<span>particular effect, and then you optimize that using much shorter event loop.</span></p>
+</li>
+</ul>
+<p><span>I still remember two specific lessons I learned when I started doing algorithms many years ago:</span></p>
+<dl>
+<dt><span>Debugging complex code is hard, </span><em><span>first</span></em><span> simplify, </span><em><span>then</span></em><span> debug</span></dt>
+<dd>
+<p><span>Originally, when I was getting a failed test, I sort of tried to add more code to my program to</span>
+<span>make it pass. At some point I realized that this is going nowhere, and then I changed my workflow</span>
+<span>to first try to </span><em><span>remove</span></em><span> as much code as I can, and only then investigate the problematic test</span>
+<span>case (which with time morphed into a skill of not writing more code then necessary in the first</span>
+<span>place).</span></p>
+</dd>
+<dt><span>Single source of truth is good</span></dt>
+<dd>
+<p><span>A lot of my early bugs was due to me duplicating the same piece of information in two places and</span>
+<span>then getting them out of sync. Internalizing that as a single source of truth fixed the issues.</span></p>
+</dd>
+</dl>
+<p><span>Meta note: if you already know this, my lessons are useless. If you don</span>&rsquo;<span>t yet know them, they are</span>
+<em><span>still</span></em><span> useless and most likely will bounce off you. This is tacit knowledge </span>&mdash;<span> it</span>&rsquo;<span>s very hard to</span>
+<span>convey it verbally, it is much more efficient to learn these things yourself by doing.</span></p>
+<p><span>Somewhat related, I noticed a surprising correlation between programming skills in the small, and</span>
+<span>programming skills in the large. You can solve a problem in five lines of code, or, if you try hard,</span>
+<span>in ten lines of code. If you consistently come up with concise solutions in the small, chances are</span>
+<span>large scale design will be simple as well.</span></p>
+<p><span>I don</span>&rsquo;<span>t know how true is that, as I never tried to look at a proper study, but it looks very</span>
+<span>plausible from what I</span>&rsquo;<span>ve seen. </span><em><span>If</span></em><span> this is true, the next interesting question is: </span>&ldquo;<span>if you train</span>
+<span>programming-in-the-small skills, do they transfer to programming in the large?</span>&rdquo;<span>. Again, I don</span>&rsquo;<span>t</span>
+<span>know, but I</span>&rsquo;<span>d take this Pascal</span>&rsquo;<span>s wager.</span></p>
+<p><em><span>Second</span></em><span>, algorithms teach about properties and invariants. Some lucky people get those skills from</span>
+<span>a hard math background, but algorithms are a much more accessible way to learn them, as everything</span>
+<span>is very visual, immediately testable, and has very short and clear feedback loop.</span></p>
+<p><span>And properties and invariants is what underlines most big and successful systems. Like 90% of the</span>
+<span>code is just fluff and glue, and if you have the skill to see the 10% that is architecturally</span>
+<span>salient properties, you could comprehend the system much faster.</span></p>
+<p><em><span>Third</span></em><span>, algorithms occasionally </span><em><span>are</span></em><span> useful at the job! Just last week on our design walk&amp;talk we</span>
+<span>were brainstorming one particular problem, and I was like</span></p>
+
+<figure class="blockquote">
+<blockquote><p><span>Wait, so the problem here is that our solution is O(1) amortized, but really that means O(N)</span>
+<span>occasionally and that creates problem. I wonder if we could shift amortized work to when we do the</span>
+<span>real work, sort of how there are helper threads in concurrent programming. Ohh, this actually sounds</span>
+<span>like range query problem! Yeah, I think that cryptic trick that is called </span>&ldquo;<span>дерево отрезков</span>&rdquo;<span> in</span>
+<span>Russian and doesn</span>&rsquo;<span>t have a meme name in English (</span>&ldquo;<span>monoid tree</span>&rdquo;<span> is a good, but unknown, name) could</span>
+<span>help here. Yup, that actually does solve amortization issue, this will be O(log N) non-amortized.</span></p>
+</blockquote>
+
+</figure>
+<p><span>We probably won</span>&rsquo;<span>t go with that solution as that</span>&rsquo;<span>s too complex algorithmically for what ultimately is</span>
+<span>a corner case, </span><em><span>but</span></em><span> it</span>&rsquo;<span>s important that we understand problem space in detail before we pick a</span>
+<span>solution.</span></p>
+<p><span>Note also how algorithms </span><em><span>vocabulary</span></em><span> helps me to think about the problem. In math (including</span>
+<span>algorithms), there</span>&rsquo;<span>s just like a handful of ideas which are applied again and again under different</span>
+<span>guises. You need some amount of insight of course, but, for most simple problems, what you actually</span>
+<span>need is just an ability to recognize the structure you</span>&rsquo;<span>ve seen somewhere already.</span></p>
+<p><em><span>Fourth</span></em><span>, connecting to the previous ones, the ideas really do form interconnected web which, on a</span>
+<span>deep level, underpins a whole lot of stuff. So, if you do have non-zero amount of pure curiosity</span>
+<span>when it comes to learning programming, algorithms cut pretty deep to the foundation. Let me repeat</span>
+<span>the list from the last post, but with explicit connections to other things:</span></p>
+<dl>
+<dt><span>linear search</span></dt>
+<dd>
+<p><span>assoc lists in most old functional languages work that way</span></p>
+</dd>
+<dt><span>binary search</span></dt>
+<dd>
+<p><span>It is literally everywhere. Also, binary search got a cute name, but actually it isn</span>&rsquo;<span>t the</span>
+<span>primitive operation. The primitive operation is </span><code>partition_point</code><span>, a predicate version of binary</span>
+<span>search. This is what you should add to your language</span>&rsquo;<span>s stdlib as a primitive, and base everything</span>
+<span>else in terms of it. Also, it is one of the few cases where we know lower bound of complexity. If</span>
+<span>an algorithm does k binary comparisons, it can give at most 2</span><sup><span>k</span></sup><span> distinct answers. So, to find</span>
+<span>insertion point among n items, you need at least k questions such that 2</span><sup><span>k</span></sup><span> &gt; n.</span></p>
+</dd>
+<dt><span>quadratic sorting</span></dt>
+<dd>
+<p><span>We use it at work! Some collections are statically bound by a small constant, and quadratically</span>
+<span>sorting them just needs less machine code. We are also a bit paranoid that production sort</span>
+<span>algorithms are very complex and </span><em><span>might</span></em><span> have subtle bugs, esp in newer languages.</span></p>
+</dd>
+<dt><span>merge sort</span></dt>
+<dd>
+<p><span>This is how you sort things on disk. This is also how LSM-trees, the most practically important</span>
+<span>data structure you haven</span>&rsquo;<span>t learned about in school, works! And k-way merge also is occasionally</span>
+<span>useful (this is from work from three weeks ago).</span></p>
+</dd>
+<dt><span>heap sort</span></dt>
+<dd>
+<p><span>Well, this one is only actually useful for the heap, </span><em><span>but</span></em><span> I think maybe the kernel uses it when</span>
+<span>it needs to sort something in place, without extra memory, and in guaranteed O(N log N)?</span></p>
+</dd>
+<dt><span>binary heap</span></dt>
+<dd>
+<p><span>Binary heaps are everywhere! Notably, simple timers are a binary heap of things in the order of</span>
+<span>expiration. This is also a part of Dijkstra and k-way-merge.</span></p>
+</dd>
+<dt><span>growable array</span></dt>
+<dd>
+<p><span>That</span>&rsquo;<span>s the mostly widely used collection of them all! Did you know that grow factor 2 has a</span>
+<span>problem that the size after </span><code>n</code><span> reallocations is larger then the sum total of all previous sizes,</span>
+<span>so the allocator can</span>&rsquo;<span>t re-use the space? Anecdotally, growth factors less than two are preferable</span>
+<span>for this reason.</span></p>
+</dd>
+<dt><span>doubly-linked list</span></dt>
+<dd>
+<p><span>At the heart of rust-analyzer is a </span><a href="https://github.com/rust-analyzer/rowan/blob/87909d03dfe78d07ae932151e105dfde7ae87536/src/sll.rs"><span>two-dimensional doubly-linked</span>
+<span>list</span></a><span>.</span></p>
+</dd>
+<dt><span>binary search tree</span></dt>
+<dd>
+<p><span>Again, rust-analyzer green tree are binary search trees using offset as an implicit key.</span>
+<span>Monoid trees are also binary search trees.</span></p>
+</dd>
+<dt><span>AVL tree</span></dt>
+<dd>
+<p><span>Ok, this one I actually don</span>&rsquo;<span>t know a direct application of! </span><em><span>But</span></em><span> I remember two</span>
+<span>programming-in-the-small lessons AVL could have taught me, but didn</span>&rsquo;<span>t. I struggled a lot</span>
+<span>implementing all of </span>&ldquo;<span>small left rotation</span>&rdquo;<span>, </span>&ldquo;<span>small right rotation</span>&rdquo;<span>, </span>&ldquo;<span>big left rotation</span>&rdquo;<span>, </span>&ldquo;<span>big right</span>
+<span>rotation</span>&rdquo;<span>. Some years later, I</span>&rsquo;<span>ve learned that you don</span>&rsquo;<span>t do</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">left: Tree,</span>
+<span class="line">right: Tree,</span></code></pre>
+
+</figure>
+<p><span>as that forces code duplication. Rather, you do </span><code class="display">children: [Tree; 2]</code><span> and then you could</span>
+<span>use </span><code>child_index</code><span> and </span><code>child_index ^ 1</code><span> to abstract over left-right.</span></p>
+<p><span>And then some years later still I read in wikipedia that big rotations are actually a composition</span>
+<span>of two small rotations.</span></p>
+<p><span>Actually, I</span>&rsquo;<span>ve lied that I don</span>&rsquo;<span>t know connections here. You use the same rotations for the splay</span>
+<span>tree.</span></p>
+</dd>
+<dt><span>Red Black Tree</span></dt>
+<dd>
+<p><span>red-black tree is a 2-3 tree is a B-tree. Also, you probably use jemalloc, and it has a red-black</span>
+<span>tree </span><a href="https://github.com/aerospike/jemalloc/blob/05108b5010a511226fb7586543f4162dd2d31d2b/include/jemalloc/internal/rb.h#L338"><span>implemented as a C</span>
+<span>macro</span></a><span>.</span>
+<span>Left-leaning red-black tree are an interesting variation, which is claimed to be simpler, but is</span>
+<span>also claimed to not actually be simpler, because it is not symmetric and neuters the </span><code>children</code>
+<span>trick.</span></p>
+</dd>
+<dt><span>B-tree</span></dt>
+<dd>
+<p><span>If you use Rust, you probably use B-tree. Also, if you use a database, it stores data either in</span>
+<span>LSM or in a B-tree. Both of these are because B-trees play nice with memory hierarchy.</span></p>
+</dd>
+<dt><span>Splay Tree</span></dt>
+<dd>
+<p><span>Worth knowing just to have a laugh at </span><a href="https://www.link.cs.cmu.edu/splay/tree5.jpg" class="url">https://www.link.cs.cmu.edu/splay/tree5.jpg</a><span>.</span></p>
+</dd>
+<dt><span>HashTable</span></dt>
+<dd>
+<p><span>Literally everywhere, both chaining and open-addressing versions are widely used.</span></p>
+</dd>
+<dt><span>Depth First Search</span></dt>
+<dd>
+<p><span>This is something I have to code, explicitly or implicitly, fairly often. Every time where you</span>
+<span>have a DAG, when things depend on other things, you</span>&rsquo;<span>d have a DFS somewhere. In rust-analyzer,</span>
+<span>there are at least a couple </span>&mdash;<span> one in borrow checker for something (have no idea what that does,</span>
+<span>just grepped for </span><code>fn dfs</code><span>) and one in crate graph to detect cycles.</span></p>
+</dd>
+<dt><span>Breadth First Search</span></dt>
+<dd>
+<p><span>Ditto, any kind of exploration problem is usually solved with bfs. Eg, rust-analyzer uses </span><code>bfs</code>
+<span>for directory traversal.</span></p>
+<p><span>Which is better, </span><code>bfs</code><span> or </span><code>dfs</code><span>? Why not both?! Take a look at bdfs from rust-analyzer:</span></p>
+<p><a href="https://github.com/rust-lang/rust-analyzer/blob/2fbe69d117ff8e3ffb9b21c4a564f835158eb67b/crates/hir-expand/src/ast_id_map.rs#L195-L222" class="url">https://github.com/rust-lang/rust-analyzer/blob/2fbe69d117ff8e3ffb9b21c4a564f835158eb67b/crates/hir-expand/src/ast_id_map.rs#L195-L222</a></p>
+</dd>
+<dt><span>Topological Sort</span></dt>
+<dd>
+<p><span>Again, comes up every time you deal with things which depend on each other. rust-analyzer has</span>
+<code>crates_in_topological_order</code></p>
+</dd>
+<dt><span>Strongly Connected Components</span></dt>
+<dd>
+<p><span>This is needed every time things depend on each other, but you also allow cyclic dependencies. I</span>
+<span>don</span>&rsquo;<span>t think I</span>&rsquo;<span>ve needed this one in real life. But, given that SCC is how you solve 2-SAT in</span>
+<span>polynomial time, seems important to know to understand the 3 in 3-SAT</span></p>
+</dd>
+<dt><span>Minimal Spanning Tree</span></dt>
+<dd>
+<p><span>Ok, really drawing a blank here! Connects to sorting, disjoint set union (which is needed for</span>
+<span>unification in type-checkers), and binary heap. Seems practically important algorithm though! Ah,</span>
+<span>MST also gives an approximation for planar traveling salseman I think, another border between hard</span>
+<span>&amp; easy problems.</span></p>
+</dd>
+<dt><span>Dijkstra</span></dt>
+<dd>
+<p><span>Dijkstra is what I think about when I imagine a Platonic </span><dfn><span>algorithm</span></dfn><span>, though</span>
+<span>I don</span>&rsquo;<span>t think I</span>&rsquo;<span>ve used it in practice? Connects to heap.</span></p>
+<p><span>Do you know why we use </span><code>i</code><span>, </span><code>j</code><span>, </span><code>k</code><span> for loop indices? Because </span><code>D ijk stra</code><span>!</span></p>
+</dd>
+<dt><span>Floyd-Warshall</span></dt>
+<dd>
+<p><span>This one is cool! Everybody knows why any regular expression can be complied to an equivalent</span>
+<span>finite state machine. Few people know the reverse, why each automaton has an equivalent regex</span>
+<span>(many people know this fact, but few understand why). Well, because Floyd-Warshall! To convert an</span>
+<span>automaton to regex use the same algorithm you use to find pairwise distances in a graph.</span></p>
+<p><span>Also, this is a final boss of dynamic programming. If you understand why this algorithm works, you</span>
+<span>understand dynamic programming. Despite being tricky to understand, it</span>&rsquo;<span>s very easy to implement! I</span>
+<span>randomly stumbled into Floyd-Warshall, when I tried to implement a different, wrong approach, and</span>
+<span>made a bug which turned my broken algo into a correct Floyd-Warshall.</span></p>
+</dd>
+<dt><span>Bellman-Ford</span></dt>
+<dd>
+<p><span>Again, not much practical applicaions here, but the theory is well connected. All shortest path</span>
+<span>algorithms are actually fixed-point iterations! But with Bellman-Ford and its explicit edge</span>
+<span>relaxation operator that</span>&rsquo;<span>s most obvious. Next time you open static analysis textbook and learn</span>
+<span>about fixed point iteration, map that onto the problem of finding shortest paths!</span></p>
+</dd>
+<dt><span>Quadratic Substring Search</span></dt>
+<dd>
+<p><span>This is what you language standard library does</span></p>
+</dd>
+<dt><span>Rabin-Karp</span></dt>
+<dd>
+<p><span>An excellent application of hashes. The same idea, </span><span class="display"><code>hash(composite) =
+compbine(hash(component)*)</code><span>,</span></span><span> is used in rust-analyzer to </span><a href="https://github.com/rust-analyzer/rowan/blob/87909d03dfe78d07ae932151e105dfde7ae87536/src/green/node_cache.rs#L86-L97"><span>intern syntax</span>
+<span>trees</span></a><span>.</span></p>
+</dd>
+<dt><span>Boyer-Moore</span></dt>
+<dd>
+<p><span>This is beautiful and practical algorithm which probably handles the bulk of real-world searches</span>
+<span>(that is, it</span>&rsquo;<span>s probably the hottest bit of </span><code>ripgrep</code><span> as used by an average person). Delightfully,</span>
+<span>this algorithm is faster than theoretically possible </span>&mdash;<span> it doesn</span>&rsquo;<span>t even look at every byte of</span>
+<span>input data!</span></p>
+</dd>
+<dt><span>Knuth-Morris-Pratt</span></dt>
+<dd>
+<p><span>Another </span>&ldquo;<span>this is how you do string search in the real world</span>&rdquo;<span> algorithm. It also is the platonic</span>
+<span>ideal of a finite state machine, and almost everything is an FSM. It also is Aho-Corasick.</span></p>
+</dd>
+<dt><span>Aho-Corasick</span></dt>
+<dd>
+<p><span>This is the same as Knuth-Morris-Pratt, but also teaches you about tries. Again, super-useful for</span>
+<span>string searches. As it is an FSM, and a regex is an FSM, and there</span>&rsquo;<span>s a general construct for</span>
+<span>building a product of two FSMs, you can use it to implement fuzzy search. </span>&ldquo;<span>Workspace symbol</span>&rdquo;
+<span>feature in rust-analyzer works like this. Here</span>&rsquo;<span>s </span><a href="https://github.com/BurntSushi/fst/pull/64"><span>a part</span>
+<span>of</span></a><span> implementation.</span></p>
+</dd>
+<dt><span>Edit Distance</span></dt>
+<dd>
+<p><span>Everywhere in Bioinformatics (not the actual edit distance, but this problem shape). The first</span>
+<span>post on this blog is about this problem:</span></p>
+<p><a href="https://matklad.github.io/2017/03/12/min-of-three.html" class="url">https://matklad.github.io/2017/03/12/min-of-three.html</a></p>
+<p><span>It</span>&rsquo;<span>s not about algorithms though, its about CPU-level parallelism.</span></p>
+</dd>
+</dl>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">Types and the Zig Programming Language</title>
+<link href="https://matklad.github.io/2023/08/09/types-and-zig.html" rel="alternate" type="text/html" title="Types and the Zig Programming Language" />
+<published>2023-08-09T00:00:00+00:00</published>
+<updated>2023-08-09T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/08/09/types-and-zig</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[Notes on less-than-obvious aspects of Zig's type system and things that surprised me after diving
+deeper into the language.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/08/09/types-and-zig.html"><![CDATA[
+    <h1>
+    <a href="#Types-and-the-Zig-Programming-Language"><span>Types and the Zig Programming Language</span> <time datetime="2023-08-09">Aug 9, 2023</time></a>
+    </h1>
+<p><span>Notes on less-than-obvious aspects of Zig</span>&rsquo;<span>s type system and things that surprised me after diving</span>
+<span>deeper into the language.</span></p>
+<section id="Nominal-Types">
+
+    <h2>
+    <a href="#Nominal-Types"><span>Nominal Types</span> </a>
+    </h2>
+<p><span>Zig has a nominal type system despite the fact that types lack names. A struct type is declared by</span>
+<span class="display"><code>struct { field: T }</code><span>.</span></span>
+<span>It</span>&rsquo;<span>s anonymous; an explicit assignment is required to name the type:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">const</span> S = <span class="hl-keyword">struct</span> {</span>
+<span class="line">  field: T,</span>
+<span class="line">};</span></code></pre>
+
+</figure>
+<p><span>Still, the type system is nominal, not structural. The following does not compile:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span><span class="hl-function"> f</span>() <span class="hl-keyword">struct</span> { f: <span class="hl-type">i32</span> } {</span>
+<span class="line">  <span class="hl-keyword">return</span> .{ .f = <span class="hl-numbers">92</span> };</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">fn</span><span class="hl-function"> g</span>(s: <span class="hl-keyword">struct</span> { f: <span class="hl-type">i32</span> }) <span class="hl-type">void</span> {</span>
+<span class="line">  _ = s;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">pub</span> <span class="hl-keyword">fn</span><span class="hl-function"> main</span>() <span class="hl-type">void</span> {</span>
+<span class="line">  g(f()); <span class="hl-comment">// &lt;- type mismatch</span></span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>The following does:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">const</span> S = <span class="hl-keyword">struct</span> { f: <span class="hl-type">i32</span> };</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">fn</span><span class="hl-function"> f</span>() S {</span>
+<span class="line">  <span class="hl-keyword">return</span> .{ .f = <span class="hl-numbers">92</span> };</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">fn</span><span class="hl-function"> g</span>(s: S) <span class="hl-type">void</span> {</span>
+<span class="line">  _ = s;</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">pub</span> <span class="hl-keyword">fn</span><span class="hl-function"> main</span>() <span class="hl-type">void</span> {</span>
+<span class="line">  g(f());</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>One place where Zig is structural are anonymous struct literals:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">pub</span> <span class="hl-keyword">fn</span><span class="hl-function"> main</span>() <span class="hl-type">void</span> {</span>
+<span class="line">  <span class="hl-keyword">const</span> x                      = .{ .foo = <span class="hl-numbers">1</span> };</span>
+<span class="line">  <span class="hl-keyword">const</span> y: <span class="hl-keyword">struct</span> { foo: <span class="hl-type">i32</span> } = x;</span>
+<span class="line">  <span class="hl-keyword">comptime</span> assert(<span class="hl-built_in">@TypeOf</span>(x) <span class="hl-operator">!=</span> <span class="hl-built_in">@TypeOf</span>(y));</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Types of </span><code>x</code><span> and </span><code>y</code><span> are different, but </span><code>x</code><span> can be coerced to </span><code>y</code><span>.</span></p>
+<p><span>In other words, Zig structs are anonymous and nominal, but anonymous structs are structural!</span></p>
+</section>
+<section id="No-Unification">
+
+    <h2>
+    <a href="#No-Unification"><span>No Unification</span> </a>
+    </h2>
+<p><span>Simple type inference for an expression works by first recursively inferring the types of</span>
+<span>subexpressions, and then deriving the result type from that. So, to infer types in</span>
+<span class="display"><code>foo().bar()</code><span>,</span></span><span> we first derive the type of </span><code>foo()</code><span>, then lookup method </span><code>bar</code><span> on that</span>
+<span>type, and use the return type of the method.</span></p>
+<p><span>More complex type inference works through so called unification algorithm. It starts with a similar</span>
+<span>recursive walk over the expression tree, but this walk doesn</span>&rsquo;<span>t infer types directly, but rather</span>
+<span>assigns a type variable to each subexpression, and generates equations relating type variables. So the</span>
+<span>result of this first phase look like this:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line">x = y</span>
+<span class="line">Int = y</span></code></pre>
+
+</figure>
+<p><span>Then, in the second phase the equations are solved, yielding, in this case, </span><code>x = Int</code><span> and </span><code>y = Int</code><span>.</span></p>
+<p><span>Usually languages with powerful type systems have unification somewhere, though often unification</span>
+<span>is limited in scope (for example, Kotlin infers types statement-at-a-time).</span></p>
+<p><span>It is curious that Zig doesn</span>&rsquo;<span>t do unification, type inference is a simple single-pass recursion (or</span>
+<span>at least it should be, I haven</span>&rsquo;<span>t looked at how it is actually implemented). So, anytime there</span>&rsquo;<span>s a</span>
+<span>generic function like</span>
+<span class="display"><code>fn reverse(comptime T: type, xs: []T) void</code><span>,</span></span>
+<span>the call site has to pass the type in explicitly:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">pub</span> <span class="hl-keyword">fn</span><span class="hl-function"> main</span>() <span class="hl-type">void</span> {</span>
+<span class="line">  <span class="hl-keyword">var</span> xs: [<span class="hl-numbers">3</span>]<span class="hl-type">i32</span> = .{<span class="hl-numbers">1</span>, <span class="hl-numbers">2</span>, <span class="hl-numbers">3</span>};</span>
+<span class="line">  reverse(<span class="hl-type">i32</span>, <span class="hl-operator">&amp;</span>xs);</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Does it mean that you have to pass the types all the time? Not really! In fact, the only place which</span>
+<span>feels like a burden are functions in </span><code>std.mem</code><span> module which operate on slices, but that</span>&rsquo;<span>s just</span>
+<span>because slices are builtin types (a kind of pointer really) without methods. The thing is, when you</span>
+<span>call a method on a </span>&ldquo;<span>generic type</span>&rdquo;<span>, its type parameters are implicitly in scope, and don</span>&rsquo;<span>t have to be</span>
+<span>specified. Study this example:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">const</span> std = <span class="hl-built_in">@import</span>(<span class="hl-string">&quot;std&quot;</span>);</span>
+<span class="line"><span class="hl-keyword">const</span> assert = std.debug.assert;</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">pub</span> <span class="hl-keyword">fn</span><span class="hl-function"> Slice</span>(<span class="hl-keyword">comptime</span> T: <span class="hl-type">type</span>) <span class="hl-type">type</span> {</span>
+<span class="line">  <span class="hl-keyword">return</span> <span class="hl-keyword">struct</span> {</span>
+<span class="line">    ptr: [<span class="hl-operator">*</span>]T,</span>
+<span class="line">    len: <span class="hl-type">usize</span>,</span>
+<span class="line"></span>
+<span class="line">    <span class="hl-keyword">fn</span><span class="hl-function"> init</span>(ptr: [<span class="hl-operator">*</span>]T, len: <span class="hl-type">usize</span>) <span class="hl-built_in">@This</span>() {</span>
+<span class="line">      <span class="hl-keyword">return</span> .{ .ptr = ptr, .len = len };</span>
+<span class="line">    }</span>
+<span class="line"></span>
+<span class="line">    <span class="hl-keyword">fn</span><span class="hl-function"> reverse</span>(slice: <span class="hl-built_in">@This</span>()) <span class="hl-type">void</span>{</span>
+<span class="line">      ...</span>
+<span class="line">    }</span>
+<span class="line">  };</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">pub</span> <span class="hl-keyword">fn</span><span class="hl-function"> main</span>() <span class="hl-type">void</span> {</span>
+<span class="line">  <span class="hl-keyword">var</span> xs: [<span class="hl-numbers">3</span>]<span class="hl-type">i32</span> = .{<span class="hl-numbers">1</span>, <span class="hl-numbers">2</span>, <span class="hl-numbers">3</span>};</span>
+<span class="line">  <span class="hl-keyword">var</span> slice = Slice(<span class="hl-type">i32</span>).init(<span class="hl-operator">&amp;</span>xs, xs.len);</span>
+<span class="line"></span>
+<span class="line">  slice.reverse(); <span class="hl-comment">// &lt;- look, no types!</span></span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>There</span>&rsquo;<span>s a runtime parallel here. At runtime, there</span>&rsquo;<span>s a single dynamic dispatch, which prioritizes</span>
+<span>dynamic type of the first argument, and multiple dynamic dispatch, which can look at dynamic types</span>
+<span>of all arguments. Here, at compile time, the type of the first argument gets a preferential</span>
+<span>treatment. And, similarly to runtime, this covers 80% of use cases! Though, I</span>&rsquo;<span>d love for things like</span>
+<code>std.mem.eql</code><span> to be actual methods on slices</span>&hellip;</p>
+</section>
+<section id="Mandatory-Function-Signatures">
+
+    <h2>
+    <a href="#Mandatory-Function-Signatures"><span>Mandatory Function Signatures</span> </a>
+    </h2>
+<p><span>One of the best tricks a language server can pull off for as-you-type analysis is skipping bodies of</span>
+<span>the functions in dependencies. This works as long as the language requires complete signatures. In</span>
+<span>functional languages, its customary to make signatures optional, which precludes this crucial</span>
+<span>optimization. As per </span><a href="https://matklad.github.io/2023/08/01/on-modularity-of-lexical-analysis.html"><em><span>Modularity Of Lexical</span>
+<span>Analysis</span></em></a><span>, this has</span>
+<span>repercussions for all of:</span></p>
+<ul>
+<li>
+<span>incremental compilation,</span>
+</li>
+<li>
+<span>parallel compilation,</span>
+</li>
+<li>
+<span>robustness to errors.</span>
+</li>
+</ul>
+<p><span>I always assumed that Zig with its crazy </span><code>comptime</code><span> requires autopsy.</span>
+<span>But that</span>&rsquo;<span>s not actually the case! Zig doesn</span>&rsquo;<span>t have </span><code>decltype(auto)</code><span>, signatures are always explicit!</span></p>
+<p><span>Let</span>&rsquo;<span>s look at, e.g., </span><code>std.mem.bytesAsSlice</code><span>:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span><span class="hl-function"> bytesAsSlice</span>(</span>
+<span class="line">  <span class="hl-keyword">comptime</span> T: <span class="hl-type">type</span>,</span>
+<span class="line">  bytes: <span class="hl-type">anytype</span>,</span>
+<span class="line">) BytesAsSliceReturnType(T, <span class="hl-built_in">@TypeOf</span>(bytes)) {</span></code></pre>
+
+</figure>
+<p><span>Note how the return type is not </span><code>anytype</code><span>, but the actual, real thing. You could write complex</span>
+<span>computations there, but you can</span>&rsquo;<span>t look inside the body. Of course, it also is possible to write </span><span class="display"><code>fn
+foo() @TypeOf(bar()) {</code><span>,</span></span><span> but that feels like a fair game </span>&mdash;<span> </span><code>bar()</code><span> will be evaluated at</span>
+<span>compile time. In other words, only bodies of functions invoked at comptime needs to be looked at by</span>
+<span>a language server. This potentially improves performance for this use-case quite a bit!</span></p>
+<p><span>It</span>&rsquo;<span>s useful to contrast this with Rust. There, you could write</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">sneaky</span>() <span class="hl-punctuation">-&gt;</span> <span class="hl-keyword">impl</span> <span class="hl-title class_">Sized</span> {</span>
+<span class="line">  <span class="hl-number">0i32</span></span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Although it feels like you are stating the interface, it</span>&rsquo;<span>s not really the case. Auto traits like</span>
+<code>Send</code><span> and </span><code>Sync</code><span> leak, and that can be detected by downstream code and lead to, e.g., different</span>
+<span>methods being called via </span><code>Deref</code><span>-based specialization depending on </span><code>: Send</code><span> being implemented:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">struct</span> <span class="hl-title class_">X</span>&lt;T&gt;(T);</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">impl</span>&lt;T: <span class="hl-built_in">Send</span>&gt; X&lt;T&gt; {</span>
+<span class="line">  <span class="hl-keyword">fn</span> <span class="hl-title function_">foo</span>(&amp;<span class="hl-keyword">self</span>) <span class="hl-punctuation">-&gt;</span> <span class="hl-type">i32</span> { todo!() }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">struct</span> <span class="hl-title class_">Y</span>;</span>
+<span class="line"><span class="hl-keyword">impl</span> <span class="hl-title class_">Y</span> {</span>
+<span class="line">  <span class="hl-keyword">fn</span> <span class="hl-title function_">foo</span>(&amp;<span class="hl-keyword">self</span>) <span class="hl-punctuation">-&gt;</span> <span class="hl-type">String</span> { todo!() }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">impl</span>&lt;T&gt; std::ops::Deref <span class="hl-keyword">for</span> <span class="hl-title class_">X</span>&lt;T&gt; {</span>
+<span class="line">  <span class="hl-keyword">type</span> <span class="hl-title class_">Target</span> = Y;</span>
+<span class="line">  <span class="hl-keyword">fn</span> <span class="hl-title function_">deref</span>(&amp;<span class="hl-keyword">self</span>) <span class="hl-punctuation">-&gt;</span> &amp;Y { todo!() }</span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">f</span>() <span class="hl-punctuation">-&gt;</span> <span class="hl-keyword">impl</span> <span class="hl-title class_">Sized</span> {</span>
+<span class="line">  ()</span>
+<span class="line"><span class="hl-comment">//  std::rc::Rc::new(())</span></span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">fn</span> <span class="hl-title function_">main</span>() {</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">x</span> = <span class="hl-title function_ invoke__">X</span>(<span class="hl-title function_ invoke__">f</span>());</span>
+<span class="line">  <span class="hl-keyword">let</span> <span class="hl-variable">t</span> = x.<span class="hl-title function_ invoke__">foo</span>(); <span class="hl-comment">// &lt;- which `foo`?</span></span>
+<span class="line">  <span class="hl-comment">// The answer is inside f&#x27;s body!</span></span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Zig is much more strict here, you have to fully name the return type (the name doesn</span>&rsquo;<span>t have to be</span>
+<span>pretty, take a second look at </span><code>bytesAsSlice</code><span>). But its not perfect, a genuine leakage happens  with</span>
+<span>inferred error types (</span><code>!T</code><span> syntax). A bad example would look like this:</span></p>
+
+<figure class="code-block">
+
+
+<pre><code><span class="line"><span class="hl-keyword">fn</span><span class="hl-function"> f</span>() <span class="hl-operator">!</span><span class="hl-type">void</span> {</span>
+<span class="line">   <span class="hl-comment">// Mystery!</span></span>
+<span class="line">}</span>
+<span class="line"></span>
+<span class="line"><span class="hl-keyword">pub</span> <span class="hl-keyword">fn</span><span class="hl-function"> main</span>() <span class="hl-operator">!</span><span class="hl-type">void</span> {</span>
+<span class="line">  f() <span class="hl-keyword">catch</span> <span class="hl-operator">|</span>err<span class="hl-operator">|</span> {</span>
+<span class="line">    <span class="hl-keyword">comptime</span> assert(</span>
+<span class="line">      <span class="hl-built_in">@typeInfo</span>(<span class="hl-built_in">@TypeOf</span>(err)).ErrorSet.?.len <span class="hl-operator">==</span> <span class="hl-numbers">1</span>,</span>
+<span class="line">    );</span>
+<span class="line">  };</span>
+<span class="line">}</span></code></pre>
+
+</figure>
+<p><span>Here, to check </span><code>main</code><span>, we actually do need to dissect </span><code>f</code>&rsquo;<span>s body, we can</span>&rsquo;<span>t treat the error union</span>
+<span>abstractly. When the compiler analyzes </span><code>main</code><span>, it needs to stop to process </span><code>f</code><span> signature (which is</span>
+<span>very fast, as it is very short) and then </span><code>f</code><span>’s body (this part could be quite slow, there might be a</span>
+<span>lot of code behind that </span><code>Mystery</code><span>! It</span>&rsquo;<span>s interesting to ponder alternative semantics, where, during</span>
+<span>type checking, inferred types are treated abstractly, and error exhastiveness is a separate late</span>
+<span>pass in the compiler. That way, complier only needs </span><code>f</code>&rsquo;<span>s signature to check </span><code>main</code><span>. And that means</span>
+<span>that bodies of </span><code>main</code><span> and </span><code>f</code><span> could be checked in parallel.</span></p>
+<p><span>That</span>&rsquo;<span>s all for today! The type system surprising I</span>&rsquo;<span>ve found so far are:</span></p>
+<ul>
+<li>
+<p><span>Nominal type system despite notable absence of names of types.</span></p>
+</li>
+<li>
+<p><span>Unification-less generics which don</span>&rsquo;<span>t incur unreasonable annotation burden due to methods </span>&ldquo;<span>closing</span>
+<span>over</span>&rdquo;<span> generic parameters.</span></p>
+</li>
+<li>
+<p><span>Explicit signatures with no </span><a href="https://wiki.dlang.org/Voldemort_types"><span>Voldemort types</span></a><span> with a</span>
+<span>notable exception of error unions.</span></p>
+</li>
+</ul>
+<p><span>Discussion on </span><a href="https://ziggit.dev/t/types-and-the-zig-programming-language/1430"><span>ziggit.dev</span></a><span>.</span></p>
+</section>
+]]></content>
+</entry>
+
+<entry>
+<title type="text">Fantastic Learning Resources</title>
+<link href="https://matklad.github.io/2023/08/06/fantastic-learning-resources.html" rel="alternate" type="text/html" title="Fantastic Learning Resources" />
+<published>2023-08-06T00:00:00+00:00</published>
+<updated>2023-08-06T00:00:00+00:00</updated>
+<id>https://matklad.github.io/2023/08/06/fantastic-learning-resources</id>
+<author><name>Alex Kladov</name></author>
+<summary type="html"><![CDATA[People sometimes ask me: Alex, how do I learn X?. This article is a compilation of advice I
+usually give. This is things that worked for me rather than the most awesome things on earth. I
+do consider every item on the list to be fantastic though, and I am forever grateful to people
+putting these resources together.]]></summary>
+<content type="html" xml:base="https://matklad.github.io/2023/08/06/fantastic-learning-resources.html"><![CDATA[
+    <h1>
+    <a href="#Fantastic-Learning-Resources"><span>Fantastic Learning Resources</span> <time datetime="2023-08-06">Aug 6, 2023</time></a>
+    </h1>
+<p><span>People sometimes ask me: </span>&ldquo;<span>Alex, how do I learn X?</span>&rdquo;<span>. This article is a compilation of advice I</span>
+<span>usually give. This is </span>&ldquo;<span>things that worked for me</span>&rdquo;<span> rather than </span>&ldquo;<span>the most awesome things on earth</span>&rdquo;<span>. I</span>
+<span>do consider every item on the list to be fantastic though, and I am forever grateful to people</span>
+<span>putting these resources together.</span></p>
+<section id="Learning-to-Code">
+
+    <h2>
+    <a href="#Learning-to-Code"><span>Learning to Code</span> </a>
+    </h2>
+<p><span>I don</span>&rsquo;<span>t think I have any useful advice on how to learn programming from zero. The rest of the post</span>
+<span>assumes that you at least can, given sufficient time, write simple programs. E.g., a program that</span>
+<span>reads a list of integers from an input textual file, sorts them using a quadratic algorithm, and</span>
+<span>writes the result to a different file.</span></p>
+</section>
+<section id="Project-Euler">
+
+    <h2>
+    <a href="#Project-Euler"><span>Project Euler</span> </a>
+    </h2>
+<p><a href="https://projecteuler.net/archives" class="url">https://projecteuler.net/archives</a><span> is fantastic. The first 50 problems or so are a perfect </span>&ldquo;<span>drill</span>&rdquo;
+<span>to build programming muscle, to go from </span>&ldquo;<span>I can write a program to sort a list of integers</span>&rdquo;<span> to </span>&ldquo;<span>I can</span>
+<em><span>easily</span></em><span> write a program to sort a list of integers</span>&rdquo;<span>.</span></p>
+<p><span>Later problems are very heavily math based. If you are mathematically inclined, this is perfect </span>&mdash;
+<span>you got to solve fun puzzles while also practicing coding. If advanced math isn</span>&rsquo;<span>t your cup of tea,</span>
+<span>feel free to stop doing problems as soon as it stops being fun.</span></p>
+</section>
+<section id="Modern-Operating-System">
+
+    <h2>
+    <a href="#Modern-Operating-System"><span>Modern Operating System</span> </a>
+    </h2>
+<p><a href="https://en.wikipedia.org/wiki/Modern_Operating_Systems" class="url">https://en.wikipedia.org/wiki/Modern_Operating_Systems</a><span> is fantastic. A </span><a href="https://en.wikipedia.org/wiki/Operating_Systems:_Design_and_Implementation"><span>version of the</span>
+<span>book</span></a><span> was the first</span>
+<span>thick programming related tome I devoured. It gives a big picture of the inner workings of software</span>
+<span>stack, and was a turning point for me personally. After reading this book I realized that I want to</span>
+<span>be a programmer.</span></p>
+</section>
+<section id="Nand-to-Tetris">
+
+    <h2>
+    <a href="#Nand-to-Tetris"><span>Nand to Tetris</span> </a>
+    </h2>
+<p><a href="https://www.nand2tetris.org" class="url">https://www.nand2tetris.org</a><span> is fantastic. It plays a similar </span>&ldquo;<span>big picture</span>&rdquo;<span> role as MOS,</span>
+<span>but this time you are the painter. In this course you build a whole computing system yourself,</span>
+<span>starting almost from nothing. It doesn</span>&rsquo;<span>t teach you how the real software/hardware stack works, but</span>
+<span>it thoroughly dispels any magic, and is extremely fun.</span></p>
+</section>
+<section id="CSES-Problem-Set">
+
+    <h2>
+    <a href="#CSES-Problem-Set"><span>CSES Problem Set</span> </a>
+    </h2>
+<p><a href="https://cses.fi/problemset/" class="url">https://cses.fi/problemset/</a><span> is fantastic. This is a list of algorithmic problems, which is</span>
+<span>meticulously crafted to cover all the standard topics to a reasonable depth. This is by far the best</span>
+<span>source for practicing algorithms.</span></p>
+</section>
+<section id="Programming-Languages">
+
+    <h2>
+    <a href="#Programming-Languages"><span>Programming Languages</span> </a>
+    </h2>
+<p><a href="https://www.coursera.org/learn/programming-languages" class="url">https://www.coursera.org/learn/programming-languages</a><span> is fantastic. This course is a whirlwind tour</span>
+<span>across several paradigms of programming, and makes you really </span><em><span>get</span></em><span> what programming languages are</span>
+<span>about (and variance).</span></p>
+</section>
+<section id="Compilers">
+
+    <h2>
+    <a href="#Compilers"><span>Compilers</span> </a>
+    </h2>
+<p><a href="http://openclassroom.stanford.edu/MainFolder/CoursePage.php?course=Compilers" class="url">http://openclassroom.stanford.edu/MainFolder/CoursePage.php?course=Compilers</a><span> is fantastic. In this</span>
+<span>course, you implement a working compiler for a simple, but real programming language. Note that you</span>
+<span>can implement your compiler in any language.</span></p>
+</section>
+<section id="Software-Architecture">
+
+    <h2>
+    <a href="#Software-Architecture"><span>Software Architecture</span> </a>
+    </h2>
+<p><a href="https://www.tedinski.com/archive/" class="url">https://www.tedinski.com/archive/</a><span> is fantastic. Work through the whole archive in chronological</span>
+<span>order. This is by far the best resource on </span>&ldquo;<span>programming in the large</span>&rdquo;<span>.</span></p>
+</section>
+<section id="Random-Bits-of-Advice">
+
+    <h2>
+    <a href="#Random-Bits-of-Advice"><span>Random Bits of Advice</span> </a>
+    </h2>
+<p><span>What follows are some things I</span>&rsquo;<span>ve learned for myself. Take with a pinch of salt!</span></p>
+<section id="On-Mentorship">
+
+    <h3>
+    <a href="#On-Mentorship"><span>On Mentorship</span> </a>
+    </h3>
+<p><span>Having a great mentor is fantastic, but mentors are not always available. Luckily, programming can</span>
+<span>be mastered without a mentor, if you got past the initial learning step. When you code, you get </span><em><span>a</span>
+<span>lot</span></em><span> of feedback, and, through trial and error, you can process the feedback to improve your skills.</span>
+<span>In fact, the hardest bit is actually finding the problems to solve (and this article suggests many).</span>
+<span>But if you have the problem, you can self-improve noticing the following:</span></p>
+<ul>
+<li>
+<span>How you verify that the solution works.</span>
+</li>
+<li>
+<span>Common bugs and techniques to avoid them in the future.</span>
+</li>
+<li>
+<span>Length of the solution: can you solve the problem using shorter, simpler code?</span>
+</li>
+<li>
+<span>Techniques </span>&mdash;<span> can you apply anything you</span>&rsquo;<span>ve read about this week? How would the problem be solved</span>
+<span>in Haskell? Could you apply pattern from language X in language Y?</span>
+</li>
+</ul>
+<p><span>In this context it is important to solve the same problem repeatedly. E.g., you could try solving</span>
+<span>the same model problem in all languages you know, with a month or two break between attempts.</span>
+<span>Repeatedly doing the same thing and noticing differences and similarities between tries is the</span>
+<span>essence of self-learning.</span></p>
+</section>
+<section id="On-Programming-Languages">
+
+    <h3>
+    <a href="#On-Programming-Languages"><span>On Programming Languages</span> </a>
+    </h3>
+<p><span>Learning your first programming language is a nightmare, because you are learning your editing</span>
+<span>environment (PyScripter, IntelliJ IDEA, VS Code) first, simple algorithms second, and the language</span>
+<span>itself third. It gets much easier afterwards!</span></p>
+<p><span>Learning different programming languages is one of the best way to improve your programming skills.</span>
+<span>By seeing what</span>&rsquo;<span>s similar, and what</span>&rsquo;<span>s different, you deeper learn how the things work under the hood.</span>
+<span>Different languages put different idioms to the forefront, and learning several expands your</span>
+<span>vocabulary considerably. As a bonus, after learning N languages, learning N+1st becomes a question</span>
+<span>of skimming through the official docs.</span></p>
+<p><span>In general, you want to cover big families of languages: Python, Java, Haskell, C, Rust, Clojure</span>
+<span>would be a good baseline. Erlang, Forth, and Prolog would be good additions afterwards.</span></p>
+</section>
+<section id="On-Algorithms">
+
+    <h3>
+    <a href="#On-Algorithms"><span>On Algorithms</span> </a>
+    </h3>
+<p><span>There are three levels of learning algorithms</span></p>
+<dl>
+<dt><span>Level 1</span></dt>
+<dd>
+<p><span>You are not actually learning algorithms, you are learning programming. At this stage, it doesn</span>&rsquo;<span>t</span>
+<span>matter how long your code is, how pretty it is, or how efficient it is. The only thing that</span>
+<span>matters is that it solves the problem. Generally, this level ends when you are fairly comfortable</span>
+<span>with recursion. Few first problems from Project Euler are a great resource here.</span></p>
+</dd>
+<dt><span>Level 2</span></dt>
+<dd>
+<p><span>Here you learn algorithms proper. The goal here is mostly encyclopedic knowledge of common</span>
+<span>techniques. There are quite a few, but not too many of those. At this stage, the most useful thing</span>
+<span>is understanding the math behind the algorithms </span>&mdash;<span> being able to explain algorithm using</span>
+<span>pencil&amp;paper, prove its correctness, and analyze Big-O runtime. Generally, you want to learn the</span>
+<span>name of algorithm or technique, read and grok the full explanation, and then implement it.</span></p>
+<p><span>I recommend doing an abstract implementation first (i.e., not </span>&ldquo;<span>HashMap to solve problem X</span>&rdquo;<span>, but</span>
+&ldquo;<span>just HashMap</span>&rdquo;<span>). Include tests in your implementation. Use randomized testing (e.g., when testing</span>
+<span>sorting algorithms, don</span>&rsquo;<span>t use a finite set of example, generate a million random ones).</span></p>
+<p><span>It</span>&rsquo;<span>s OK and even desirable to implement the same algorithm multiple times. When solving problems,</span>
+<span>like CSES, you </span><em><span>could</span></em><span> abstract your solutions and re-use them, but it</span>&rsquo;<span>s better to code everything</span>
+<span>from scratch every time, until you</span>&rsquo;<span>ve fully internalized the algorithm.</span></p>
+</dd>
+<dt><span>Level 3</span></dt>
+<dd>
+<p><span>One day, long after I</span>&rsquo;<span>ve finished my university, I was a TA for an algorithms course. The lecturer</span>
+<span>for the course was the person who originally taught me to program, through a similar algorithms</span>
+<span>course. And, during one coffee break, he said something like</span></p>
+
+<figure class="blockquote">
+<blockquote><p><span>We don</span>&rsquo;<span>t teach algorithms so that students can code Dijkstra with their eyes closed on the job.</span>
+<span>They probably won</span>&rsquo;<span>t have to code any fancy algorithms themselves.</span></p>
+<p><span>We teach algorithms so that students learn to think about invariants and properties when writing</span>
+<span>code. Real-life code is usually simple enough that it mostly works if you just throw spaghetti</span>
+<span>onto the wall. But it doesn</span>&rsquo;<span>t always work. To write correct, robust code at work, you need to</span>
+<span>think about invariants.</span></p>
+<p><span>The trick with algorithms is that coding them is hard. The only way to avoid bugs is to force</span>
+<span>yourself to think in terms of invariants.</span></p>
+</blockquote>
+
+</figure>
+<p><span>I was thunderstruck! I didn</span>&rsquo;<span>t realize that</span>&rsquo;<span>s the reason why I am learning (well, teaching at that</span>
+<span>point) algorithms! Before, I always muddled through my algorithms by randomly tweaking generally</span>
+<span>correct stuff until it works. E.g., with a binary search, just add </span><code>+1</code><span> somewhere until it doesn</span>&rsquo;<span>t</span>
+<span>loop on random arrays. After hearing this advice, I went home and wrote my millionth binary</span>
+<span>search, but this time I actually added comments with loop invariants, and it worked from the first</span>
+<span>try! I applied similar techniques for the rest of the course, and since then my subjective</span>
+<span>perception of bug rate (for normal work code) went down dramatically.</span></p>
+<p><span>So this is the third level of algorithms </span>&mdash;<span> you hone your coding skills to program without bugs.</span>
+<span>If you are already fairly comfortable with algorithms, try doing CSES again. But this time, spend</span>
+<span>however much you need double-checking the code </span><em><span>before</span></em><span> submission, but try to get everything</span>
+<span>correct on the first try.</span></p>
+</dd>
+</dl>
+</section>
+<section id="On-Algorithm-Names">
+
+    <h3>
+    <a href="#On-Algorithm-Names"><span>On Algorithm Names</span> </a>
+    </h3>
+<p><span>Here</span>&rsquo;<span>s the list of things you might want to be able to do, algorithmically. You don</span>&rsquo;<span>t need to be</span>
+<span>able to code everything on the spot. I think it would help if you know what each word is about, and</span>
+<span>have implemented the thing at least once in the past.</span></p>
+<p><span>Linear search, binary search, quadratic sorting, quick sort, merge sort, heap sort, binary heap,</span>
+<span>growable array (aka ArrayList, vector), doubly-linked list, binary search tree, avl tree, red-black</span>
+<span>tree, B-tree, splay tree, hash table (chaining and open addressing), depth first search, breadth first</span>
+<span>search, topological sort, strongly connected components, minimal spanning tree (Prim &amp; Kruskal),</span>
+<span>shortest paths (bfs, Dijkstra, Floyd–Warshall, Bellman–Ford), substring search (quadratic,</span>
+<span>Rabin-Karp, Boyer-Moore, Knuth-Morris-Pratt), trie, Aho-Corasick, dynamic programming (longest</span>
+<span>common subsequence, edit distance).</span></p>
+</section>
+<section id="On-Larger-Programs">
+
+    <h3>
+    <a href="#On-Larger-Programs"><span>On Larger Programs</span> </a>
+    </h3>
+<p><span>A very powerful exercise is coding a medium-sized project from scratch. Something that takes more</span>
+<span>than a day, but less than a week, and has a meaningful architecture which can be just right, or</span>
+<span>messed up. Here are some great projects to do:</span></p>
+<dl>
+<dt><span>Ray Tracer</span></dt>
+<dd>
+<p><span>Given an analytical description of a 3D scene, convert it to a colored 2D image, by simulating a</span>
+<span>path of a ray of light as it bounces off objects.</span></p>
+</dd>
+<dt><span>Software Rasterizer</span></dt>
+<dd>
+<p><span>Given a description of a 3D scene as a set of triangles, convert it to a colored 2D image by</span>
+<span>projecting triangles onto the viewing plane and drawing the projections in the correct order.</span></p>
+</dd>
+<dt><span>Dynamically Typed Programming Language</span></dt>
+<dd>
+<p><span>An </span><em><span>interpreter</span></em><span> which reads source code as text, parses it into an AST, and directly executes the</span>
+<span>AST (or maybe converts AST to the byte code for some speed up)</span></p>
+</dd>
+<dt><span>Statically Typed Programming Language</span></dt>
+<dd>
+<p><span>A </span><em><span>compiler</span></em><span> which reads source code as text, and spits out a binary (WASM would be a terrific</span>
+<span>target).</span></p>
+</dd>
+<dt><span>Relational Database</span></dt>
+<dd>
+<p><span>Several components:</span></p>
+<ul>
+<li>
+<span>Storage engine, which stores data durably on disk and implements on-disk ordered data structures</span>
+<span>(B-tree or LSM)</span>
+</li>
+<li>
+<span>Relational data model which is implemented on top of primitive ordered data structures.</span>
+</li>
+<li>
+<span>Relational language to express schema and queries.</span>
+</li>
+<li>
+<span>Either a TCP server to accept transactions as a database server, or an API for embedding for an</span>
+<span>in-processes </span>&ldquo;<span>embedded</span>&rdquo;<span> database.</span>
+</li>
+</ul>
+</dd>
+<dt><span>Chat Server</span></dt>
+<dd>
+<p><span>An exercise in networking and asynchronous programming. Multiple client programs connect to a</span>
+<span>server program. A client can send a message either to a specific different client, or to all other</span>
+<span>clients (broadcast). There are many variations on how to implement this: blocking read/write</span>
+<span>calls, </span><code>epoll</code><span>, </span><code>io_uring</code><span>, threads, callbacks, futures, manually-coded state machines.</span></p>
+</dd>
+</dl>
+<p><span>Again, it</span>&rsquo;<span>s more valuable to do the same exercise six times with variations, than to blast through</span>
+<span>everything once.</span></p>
+</section>
+</section>
+]]></content>
+</entry>
+
+</feed>
